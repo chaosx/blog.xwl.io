@@ -144,29 +144,6 @@ function loadlive2d() {
     }
 }
 
-function getStar() {
-    var star = document.getElementById("star");
-    var star_count = 0;
-    var url = "https://api.github.com/users/ITJoker233/repos?page=";
-    var xhr = new XMLHttpRequest();
-    xhr.open('get', url);
-    xhr.onreadystatechange = function() {
-        if (xhr.readyState === 4) {
-            var data = JSON.parse(xhr.responseText);
-            for (var i = 0; i < data.length; i++) {
-                if (data[i]['name'] == "Gridea-theme-Chic") {
-                    star_count = data[i]['stargazers_count'];
-                    for (var j = 0; j < parseInt(star_count) + 1; j++) {
-                        setTimeout(setTimeout(star.innerHTML = j.toString(), 500), 100);
-                    }
-                    break;
-                }
-            }
-        }
-    }
-    xhr.send();
-}
-
 function CheckVersion() {
     var xhr = new XMLHttpRequest();
     //xhr.open('get', 'https://api.github.com/repos/ITJoker233/Gridea-theme-Chic/releases/latest');
