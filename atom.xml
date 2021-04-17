@@ -2,7 +2,7 @@
 <feed xmlns="http://www.w3.org/2005/Atom">
     <id>https://blog.xwl.io</id>
     <title>神鬼莫测许大仙</title>
-    <updated>2021-04-17T16:48:12.510Z</updated>
+    <updated>2021-04-17T16:51:40.999Z</updated>
     <generator>https://github.com/jpmonette/feed</generator>
     <link rel="alternate" href="https://blog.xwl.io"/>
     <link rel="self" href="https://blog.xwl.io/atom.xml"/>
@@ -67,8 +67,8 @@
 	}
 }
 </code></pre>
-<p>简要分析<br>
-首先<code>max_processed</code>限制了每次最大只能处理200个任务</p>
+<h2 id="简要说明">简要说明</h2>
+<p>首先<code>max_processed</code>限制了每次最大只能处理200个任务</p>
 <pre><code class="language-c">if (unlikely(!rq_next)) {
     rq_next = eb32_lookup_ge(&amp;rqueue, rqueue_ticks - TIMER_LOOK_BACK);
     if (!rq_next) {
@@ -107,7 +107,8 @@ if (likely(t != NULL)) {
 <li>dns_process_resolve</li>
 <li>session_expire_embryonic</li>
 </ul>
-<h2 id="process_stream">process_stream</h2>
+<h2 id="函数分析">函数分析</h2>
+<h3 id="process_stream">process_stream</h3>
 <p>这个函数只怕是有几千行哦，又长又臭：）<br>
 这个是haproxy处理任务的核心函数，代码内有一段注释说明。</p>
 <blockquote>

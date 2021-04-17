@@ -80,7 +80,7 @@
                         <input id="switch_default" type="checkbox" class="switch_default">
                         <label for="switch_default" class="toggleBtn"></label>
             </div>
-            <form id="gridea-search-form" data-update="1618678088626" action="/search/index.html">
+            <form id="gridea-search-form" data-update="1618678298555" action="/search/index.html">
                 <input class="search-input" autocomplete="off" spellcheck="false" name="q" autofocus="true" placeholder="Search...">
             </form>
         </div>
@@ -99,7 +99,7 @@
                         <!--zh-->
                         <a id="mobile-toggle-theme-zh" class="a zh">&nbsp;&#x6697;&#x9ED1;</a>
                     </div>
-                    <form id="gridea-search-form" data-update="1618678088626" action="/search/index.html">
+                    <form id="gridea-search-form" data-update="1618678298555" action="/search/index.html">
                         <input class="search-input" autocomplete="off" spellcheck="false" name="q" autofocus="true" placeholder="Search...">
                     </form>
                     <!--en-->
@@ -211,7 +211,7 @@
                                         <span class="post-readtime">&#x9605;&#x8BFB;&#x65F6;&#x95F4;:<a
                                     href="#">4.0
                                     &#x5206;&#x949F;</a></span>
-                                        <span class="post-words">&#x5B57;&#x6570;:<a href="#">848</a></span>
+                                        <span class="post-words">&#x5B57;&#x6570;:<a href="#">852</a></span>
                                         
                                             <span class="post-category">&#x5206;&#x7C7B;:
                                 
@@ -278,8 +278,8 @@
 	}
 }
 </code></pre>
-<p>简要分析<br>
-首先<code>max_processed</code>限制了每次最大只能处理200个任务</p>
+<h2 id="简要说明">简要说明</h2>
+<p>首先<code>max_processed</code>限制了每次最大只能处理200个任务</p>
 <pre><code class="language-c">if (unlikely(!rq_next)) {
     rq_next = eb32_lookup_ge(&amp;rqueue, rqueue_ticks - TIMER_LOOK_BACK);
     if (!rq_next) {
@@ -318,7 +318,8 @@ if (likely(t != NULL)) {
 <li>dns_process_resolve</li>
 <li>session_expire_embryonic</li>
 </ul>
-<h2 id="process_stream">process_stream</h2>
+<h2 id="函数分析">函数分析</h2>
+<h3 id="process_stream">process_stream</h3>
 <p>这个函数只怕是有几千行哦，又长又臭：）<br>
 这个是haproxy处理任务的核心函数，代码内有一段注释说明。</p>
 <blockquote>
@@ -408,8 +409,10 @@ if (unlikely(si_b-&gt;state == SI_ST_DIS)) {
                                 <ul class="markdownIt-TOC">
 <li>
 <ul>
-<li><a href="#process_stream">process_stream</a>
+<li><a href="#%E7%AE%80%E8%A6%81%E8%AF%B4%E6%98%8E">简要说明</a></li>
+<li><a href="#%E5%87%BD%E6%95%B0%E5%88%86%E6%9E%90">函数分析</a>
 <ul>
+<li><a href="#process_stream">process_stream</a></li>
 <li><a href="#resync_stream_interface">resync_stream_interface</a></li>
 <li><a href="#resync_request">resync_request</a></li>
 <li><a href="#resync_response">resync_response</a></li>
@@ -448,8 +451,8 @@ if (unlikely(si_b-&gt;state == SI_ST_DIS)) {
                         <i class="post-share"></i>
                         <span>&#x5206;&#x4EAB;:</span>
                                                                     <a title="QR 码" target="_blank" href="https://api.qrserver.com/v1/create-qr-code/?size=150x150&data=https://blog.xwl.io/post/TZUaQzhYM/"><i class="fa fa-qrcode"></i></a>
-                                                                    <a title="QQ" target="_blank" href="https://sns.qzone.qq.com/cgi-bin/qzshare/cgi_qzshare_onekey?url=https://blog.xwl.io/post/TZUaQzhYM/&sharesource=qzone&title=haproxy源码阅读（二）处理任务流程&pics=https://blog.xwl.io/images/avatar.png?v=1618678088626&summary="><i class="fa fa-qq"></i></a>
-                                                                    <a title="新浪微博" target="_blank" href="https://service.weibo.com/share/share.php?url=https://blog.xwl.io/post/TZUaQzhYM/&sharesource=weibo&title=haproxy源码阅读（二）处理任务流程 + " - " + &pic="https://blog.xwl.io/images/avatar.png?v=1618678088626 "><i class="fa fa-weibo "></i></a>
+                                                                    <a title="QQ" target="_blank" href="https://sns.qzone.qq.com/cgi-bin/qzshare/cgi_qzshare_onekey?url=https://blog.xwl.io/post/TZUaQzhYM/&sharesource=qzone&title=haproxy源码阅读（二）处理任务流程&pics=https://blog.xwl.io/images/avatar.png?v=1618678298555&summary="><i class="fa fa-qq"></i></a>
+                                                                    <a title="新浪微博" target="_blank" href="https://service.weibo.com/share/share.php?url=https://blog.xwl.io/post/TZUaQzhYM/&sharesource=weibo&title=haproxy源码阅读（二）处理任务流程 + " - " + &pic="https://blog.xwl.io/images/avatar.png?v=1618678298555 "><i class="fa fa-weibo "></i></a>
 
                                                                     </span>
                                                                     
@@ -533,7 +536,7 @@ if (unlikely(si_b-&gt;state == SI_ST_DIS)) {
                     console.clear();
                     
                     var newDate = new Date();
-                    newDate.setTime(1618678088626);
+                    newDate.setTime(1618678298555);
                     console.log(" Blog Update Time: " + newDate.toLocaleDateString());
                     console.log("\n %c \u26a1Theme:Chic Author's Blog:https://blog.itjoker.cn  Write By ITJoker  \n\n", "color: #ffffff; background: rgba(49, 49, 49, 0.85); padding:5px 0;border-radius:5px;");
                 </script>
