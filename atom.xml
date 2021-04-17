@@ -2,7 +2,7 @@
 <feed xmlns="http://www.w3.org/2005/Atom">
     <id>https://blog.xwl.io</id>
     <title>神鬼莫测许大仙</title>
-    <updated>2021-04-17T15:38:56.494Z</updated>
+    <updated>2021-04-17T15:54:31.980Z</updated>
     <generator>https://github.com/jpmonette/feed</generator>
     <link rel="alternate" href="https://blog.xwl.io"/>
     <link rel="self" href="https://blog.xwl.io/atom.xml"/>
@@ -11,11 +11,293 @@
     <icon>https://blog.xwl.io/favicon.ico</icon>
     <rights>All rights reserved 2021, 神鬼莫测许大仙</rights>
     <entry>
+        <title type="html"><![CDATA[haproxy源码阅读（二）处理任务流程]]></title>
+        <id>https://blog.xwl.io/post/TZUaQzhYM/</id>
+        <link href="https://blog.xwl.io/post/TZUaQzhYM/">
+        </link>
+        <updated>2021-04-16T15:45:38.000Z</updated>
+        <content type="html"><![CDATA[<blockquote>
+<p>所有源码分析基于haproxy version 1.6.14</p>
+</blockquote>
+<p>直接进入正题</p>
+<p>核心代码如下task.c</p>
+<pre><code class="language-c">void process_runnable_tasks()
+{
+	struct task *t;
+	unsigned int max_processed;
+
+	tasks_run_queue_cur = tasks_run_queue; 	nb_tasks_cur = nb_tasks;
+	max_processed = tasks_run_queue;
+
+	if (!tasks_run_queue)
+		return;
+
+	if (max_processed &gt; 200)
+		max_processed = 200;
+
+	if (likely(niced_tasks))
+		max_processed = (max_processed + 3) / 4;
+
+	while (max_processed--) {
+		if (unlikely(!rq_next)) {
+			rq_next = eb32_lookup_ge(&amp;rqueue, rqueue_ticks - TIMER_LOOK_BACK);
+			if (!rq_next) {
+				rq_next = eb32_first(&amp;rqueue);
+				if (!rq_next)
+					break;
+			}
+		}
+
+		t = eb32_entry(rq_next, struct task, rq);
+		rq_next = eb32_next(rq_next);
+		__task_unlink_rq(t);
+
+		t-&gt;state |= TASK_RUNNING;
+		t-&gt;calls++;
+		if (likely(t-&gt;process == process_stream))
+			t = process_stream(t);
+		else
+			t = t-&gt;process(t);
+
+		if (likely(t != NULL)) {
+			t-&gt;state &amp;= ~TASK_RUNNING;
+			if (t-&gt;expire)
+				task_queue(t);
+		}
+	}
+}
+</code></pre>
+<p>简要分析<br>
+首先<code>max_processed</code>限制了每次最大只能处理200个任务</p>
+<pre><code class="language-c">if (unlikely(!rq_next)) {
+    rq_next = eb32_lookup_ge(&amp;rqueue, rqueue_ticks - TIMER_LOOK_BACK);
+    if (!rq_next) {
+        /* we might have reached the end of the tree, typically because
+         * &lt;rqueue_ticks&gt; is in the first half and we're first scanning
+         * the last half. Let's loop back to the beginning of the tree now.
+         */
+        rq_next = eb32_first(&amp;rqueue);
+        if (!rq_next)
+            break;
+    }
+}
+</code></pre>
+<p>如果下一个处理的任务为空，那么将回到队列的最前方。</p>
+<pre><code class="language-c">t = eb32_entry(rq_next, struct task, rq);
+rq_next = eb32_next(rq_next);
+__task_unlink_rq(t);
+</code></pre>
+<p>我们获取到下一个任务之后，清除任务的队列信息，也就是删除当前的树节点</p>
+<pre><code class="language-c">if (likely(t-&gt;process == process_stream))
+	t = process_stream(t);
+else
+	t = t-&gt;process(t);
+
+if (likely(t != NULL)) {
+	t-&gt;state &amp;= ~TASK_RUNNING;
+	if (t-&gt;expire)
+		task_queue(t);
+}
+</code></pre>
+<p>判断如果是处理请求的话，使用<code>process_stream</code>，还有其他多种情况，比如：</p>
+<ul>
+<li>process_check</li>
+<li>server_warmup</li>
+<li>process_email_alert</li>
+<li>dns_process_resolve</li>
+<li>session_expire_embryonic</li>
+</ul>
+<h2 id="process_stream">process_stream</h2>
+<p>这个函数只怕是有几千行哦，又长又臭：）<br>
+这个是haproxy处理任务的核心函数，代码内有一段注释说明。</p>
+<blockquote>
+<p>Processes the client, server, request and response jobs of a stream task, then puts it back to the wait queue in a clean state</p>
+</blockquote>
+<p>然后进行一些初始化工作</p>
+<pre><code class="language-c">struct channel *req, *res;
+struct stream_interface *si_f, *si_b;
+
+req = &amp;s-&gt;req;
+res = &amp;s-&gt;res;
+
+si_f = &amp;s-&gt;si[0];
+si_b = &amp;s-&gt;si[1];
+</code></pre>
+<p><code>si_f</code>生产者，对应的是frontend端的句柄；而<code>si_b</code>为消费者，对应的backend端的句柄。</p>
+<pre><code class="language-c">if (unlikely(s-&gt;pending_events &amp; TASK_WOKEN_TIMER)) {
+    ...
+    
+    goto update_exp_and_leave
+}
+</code></pre>
+<p>此条件判断是否有超时事件，<code>TASK_WOKEN_TIMER</code>在任务超时的时候会被唤醒，然后开始检查<code>si_f</code>、<code>si_b</code>、<code>req channel</code>和<code>res channel</code>，随之将连接关闭。</p>
+<p>然后进入<code>update_exp_and_leave</code>函数，此函数会将初始化过期时间，是其内部实现的一个ticks。释放buffer之后，使用<code>stream_res_wakeup</code>函数将其重新加入队列。</p>
+<pre><code class="language-c">if (si_b-&gt;state == SI_ST_CON) {
+	if (unlikely(!sess_update_st_con_tcp(s)))
+		sess_update_st_cer(s);
+	else if (si_b-&gt;state == SI_ST_EST)
+		sess_establish(s);
+}
+</code></pre>
+<p>如果是状态为SI_ST_CON（发起连接请求），则进入此流程。检查连接是否是正常，<code>sess_update_st_con_tcp</code>检查连接，如果之前的连接建立失败了，使用<code>sess_update_st_cer</code>处理善后事宜，清空session等操作，如果需要重试的话，则使用<code>process_srv_queue</code>重新进入proxy queue。</p>
+<p>如果状态是SI_ST_EST，说明连接建立成功，使用<code>sess_establish</code>初始化一些参数。</p>
+<h3 id="resync_stream_interface">resync_stream_interface</h3>
+<p>作为子分支存在，主要用于检测连接可用性。</p>
+<pre><code class="language-c">if (unlikely(si_f-&gt;state == SI_ST_DIS))
+	si_f-&gt;state = SI_ST_CLO;
+
+if (unlikely(si_b-&gt;state == SI_ST_DIS)) {
+	si_b-&gt;state = SI_ST_CLO;
+	srv = objt_server(s-&gt;target);
+	if (srv) {
+		if (s-&gt;flags &amp; SF_CURR_SESS) {
+			s-&gt;flags &amp;= ~SF_CURR_SESS;
+			srv-&gt;cur_sess--;
+		}
+		sess_change_server(s, NULL);
+		if (may_dequeue_tasks(srv, s-&gt;be))
+			process_srv_queue(srv);
+	}
+}
+</code></pre>
+<p><code>may_dequeue_tasks</code> 用于判断是否有必要开始下个连接</p>
+<ul>
+<li><code>s-&gt;nbpend</code> 等待处理的连接数</li>
+<li><code>srv_is_usable</code> 是否有可用的服务器</li>
+<li><code>maxconn</code> 最大连接数等</li>
+</ul>
+<p><code>process_srv_queue</code> 检测proxy queue的是否有正在等待处理的连接，并将它们全部唤醒。</p>
+<h3 id="resync_request">resync_request</h3>
+<p>用于分析请求，主要函数</p>
+<ul>
+<li>tcp_inspect_request</li>
+<li>http_wait_for_request</li>
+<li>http_wait_for_request_body</li>
+<li>http_process_req_common</li>
+<li>process_switching_rules</li>
+<li>tcp_inspect_request</li>
+<li>http_process_req_common</li>
+<li>process_server_rules</li>
+<li>http_process_request</li>
+<li>process_sticking_rules</li>
+<li>http_request_forward_body</li>
+</ul>
+<h3 id="resync_response">resync_response</h3>
+<ul>
+<li>tcp_inspect_response</li>
+<li>http_wait_for_response</li>
+<li>process_store_rules</li>
+<li>http_process_res_common</li>
+<li>http_response_forward_body</li>
+</ul>
+]]></content>
+    </entry>
+    <entry>
+        <title type="html"><![CDATA[haproxy源码阅读（一）主循环流程]]></title>
+        <id>https://blog.xwl.io/post/s5EVafZW4/</id>
+        <link href="https://blog.xwl.io/post/s5EVafZW4/">
+        </link>
+        <updated>2021-04-15T15:39:58.000Z</updated>
+        <content type="html"><![CDATA[<blockquote>
+<p>所有源码分析基于haproxy version 1.6.14</p>
+</blockquote>
+<p>首先分析核心代码<code>haproxy.c</code></p>
+<pre><code class="language-c">/* Runs the polling loop */
+void run_poll_loop()
+{
+	int next;
+
+	tv_update_date(0,1);
+	while (1) {
+		/* Process a few tasks */
+		process_runnable_tasks();
+
+		/* check if we caught some signals and process them */
+		signal_process_queue();
+
+		/* Check if we can expire some tasks */
+		next = wake_expired_tasks();
+
+		/* stop when there's nothing left to do */
+		if (jobs == 0)
+			break;
+
+		/* expire immediately if events are pending */
+		if (fd_cache_num || tasks_run_queue || signal_queue_len || applets_active_queue)
+			next = now_ms;
+
+		/* The poller will ensure it returns around &lt;next&gt; */
+		cur_poller.poll(&amp;cur_poller, next);
+		fd_process_cached_events();
+		applet_run_active();
+	}
+}
+</code></pre>
+<h2 id="简要说明">简要说明</h2>
+<ol>
+<li>process_runnable_tasks 处理可运行的任务</li>
+<li>signal_process_queue   处理信号队列，如果捕获了信号则需要处理</li>
+<li>wake_expired_tasks     处理超时任务</li>
+<li>cur_poller.poll 更新fd事件到缓存</li>
+<li>fd_process_cached_events 处理fd事件</li>
+</ol>
+<h2 id="函数分析">函数分析</h2>
+<p>整体描述下函数的作用</p>
+<h3 id="process_runnable_tasks">process_runnable_tasks</h3>
+<p>取出队列中的任务，调用<code>process_stream</code>函数处理，返回之后重新将task放入等待队列<br>
+主要任务</p>
+<ul>
+<li>根据预设的规则设置一个backend<br>
+<code>process_switching_rules</code> -&gt; <code>stream_set_backend</code></li>
+<li>根据相应的调度算法，选择后端服务器，并添加到队列中<br>
+<code>sess_prepare_conn_req</code> -&gt; <code>srv_redispatch_connect</code> -&gt; <code>assign_server_and_queue</code> -&gt; <code>assign_server</code> -&gt; <code>chash_get_next_server</code></li>
+<li>后端服务器请求已满，添加到proxy队列<br>
+<code>pendconn_add</code></li>
+</ul>
+<h3 id="signal_process_queue">signal_process_queue</h3>
+<p>自身实现的信号处理机制，接收到信号之后输出到队列，然后在处理信号队列，保证所有请求处理完之后再关闭</p>
+<h3 id="wake_expired_tasks">wake_expired_tasks</h3>
+<p>唤醒超时任务，队列分为run queue／wait queue，该函数就是检查wait queue任务，并将其输出到run queue中，以便后续处理。</p>
+<h3 id="cur_pollerpoll">cur_poller.poll</h3>
+<p>获取所有活动的fd，并将其更新到cache中</p>
+<p>主要函数</p>
+<ul>
+<li>_do_poll
+<ul>
+<li>epoll_wait</li>
+<li>fd_may_recv</li>
+<li>fd_may_send
+<ul>
+<li>fd_update_cache</li>
+</ul>
+</li>
+</ul>
+</li>
+</ul>
+<h3 id="fd_process_cached_events">fd_process_cached_events</h3>
+<p>处理fd事件，建立连接、数据收发等</p>
+<p>主要函数</p>
+<ul>
+<li>conn_fd_handler
+<ul>
+<li>si_conn_recv_cb
+<ul>
+<li>raw_sock_to_pipe/ssl_sock_to_buf</li>
+<li>raw_sock_to_buf</li>
+</ul>
+</li>
+<li>si_conn_send_cb</li>
+</ul>
+</li>
+</ul>
+]]></content>
+    </entry>
+    <entry>
         <title type="html"><![CDATA[使用vscode调试haproxy]]></title>
         <id>https://blog.xwl.io/post/tS0UUUJy6/</id>
         <link href="https://blog.xwl.io/post/tS0UUUJy6/">
         </link>
-        <updated>2021-04-17T15:29:08.000Z</updated>
+        <updated>2021-04-15T15:29:08.000Z</updated>
         <content type="html"><![CDATA[<h2 id="基础环境配置">基础环境配置</h2>
 <p>mac环境下，自带的是clang，在编辑haproxy的时候会出现一系列的warning，所以先安装下gcc，haproxy官方测试通过的只有4.x版本</p>
 <pre><code>brew install gcc@4.9

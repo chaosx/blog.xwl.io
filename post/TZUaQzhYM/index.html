@@ -198,7 +198,7 @@
                     <article class="post-wrap">
                         <header class="post-header">
                             <h1 class="post-title">
-                                使用vscode调试haproxy
+                                haproxy源码阅读（二）处理任务流程
                             </h1>
                             
                                     <!--zh-->
@@ -207,11 +207,11 @@
                                         <a itemprop="author" rel="author" href="/">
                                             许大仙
                                         </a>
-                                        <span class="post-time">&#x65E5;&#x671F;: <a href="#">2021-04-15</a></span>
+                                        <span class="post-time">&#x65E5;&#x671F;: <a href="#">2021-04-16</a></span>
                                         <span class="post-readtime">&#x9605;&#x8BFB;&#x65F6;&#x95F4;:<a
-                                    href="#">1.4
+                                    href="#">4.0
                                     &#x5206;&#x949F;</a></span>
-                                        <span class="post-words">&#x5B57;&#x6570;:<a href="#">290</a></span>
+                                        <span class="post-words">&#x5B57;&#x6570;:<a href="#">848</a></span>
                                         
                                             <span class="post-category">&#x5206;&#x7C7B;:
                                 
@@ -227,58 +227,180 @@
                         </header>
                         
                         <div class="post-content">
-                            <h2 id="基础环境配置">基础环境配置</h2>
-<p>mac环境下，自带的是clang，在编辑haproxy的时候会出现一系列的warning，所以先安装下gcc，haproxy官方测试通过的只有4.x版本</p>
-<pre><code>brew install gcc@4.9
-</code></pre>
-<p>然后修改haproxy的Makefile，120行。</p>
-<pre><code>CC = /usr/local/Cellar/gcc\@4.9/4.9.4_1/bin/gcc-4.9
-</code></pre>
-<p>编译安装</p>
-<pre><code>make TARGET=osx
-make install PREFIX=/opt/haproxy
-</code></pre>
-<h2 id="vscode-配置">vscode 配置</h2>
-<ul>
-<li>tasks.json</li>
-</ul>
-<pre><code>{
-    &quot;version&quot;: &quot;2.0.0&quot;,
-    &quot;tasks&quot;: [
-        {
-            &quot;label&quot;: &quot;haproxy&quot;,
-            &quot;type&quot;: &quot;shell&quot;,
-            &quot;command&quot;: &quot;sudo make TARGET=osx &amp;&amp; sudo make install PREFIX=/opt/haproxy &amp;&amp; sudo make clean&quot;,
-            &quot;problemMatcher&quot;: [
-                &quot;$gcc&quot;
-            ]
-        }
-    ]
+                            <blockquote>
+<p>所有源码分析基于haproxy version 1.6.14</p>
+</blockquote>
+<p>直接进入正题</p>
+<p>核心代码如下task.c</p>
+<pre><code class="language-c">void process_runnable_tasks()
+{
+	struct task *t;
+	unsigned int max_processed;
+
+	tasks_run_queue_cur = tasks_run_queue; 	nb_tasks_cur = nb_tasks;
+	max_processed = tasks_run_queue;
+
+	if (!tasks_run_queue)
+		return;
+
+	if (max_processed &gt; 200)
+		max_processed = 200;
+
+	if (likely(niced_tasks))
+		max_processed = (max_processed + 3) / 4;
+
+	while (max_processed--) {
+		if (unlikely(!rq_next)) {
+			rq_next = eb32_lookup_ge(&amp;rqueue, rqueue_ticks - TIMER_LOOK_BACK);
+			if (!rq_next) {
+				rq_next = eb32_first(&amp;rqueue);
+				if (!rq_next)
+					break;
+			}
+		}
+
+		t = eb32_entry(rq_next, struct task, rq);
+		rq_next = eb32_next(rq_next);
+		__task_unlink_rq(t);
+
+		t-&gt;state |= TASK_RUNNING;
+		t-&gt;calls++;
+		if (likely(t-&gt;process == process_stream))
+			t = process_stream(t);
+		else
+			t = t-&gt;process(t);
+
+		if (likely(t != NULL)) {
+			t-&gt;state &amp;= ~TASK_RUNNING;
+			if (t-&gt;expire)
+				task_queue(t);
+		}
+	}
 }
 </code></pre>
-<p>此时运行任务的时候就自动执行tasks.json的任务，进行编译，完成之后就能顺利调试。</p>
-<ul>
-<li>launch.json</li>
-</ul>
-<pre><code>{
-    &quot;version&quot;: &quot;0.2.0&quot;,
-    &quot;configurations&quot;: [
-        {
-            &quot;name&quot;: &quot;(gdb) Launch&quot;,
-            &quot;type&quot;: &quot;cppdbg&quot;,
-            &quot;request&quot;: &quot;launch&quot;,
-            &quot;program&quot;: &quot;/opt/haproxy/sbin/haproxy&quot;,
-            &quot;args&quot;: [&quot;-f&quot;, &quot;/opt/haproxy/etc/haproxy.cfg&quot;],
-            &quot;stopAtEntry&quot;: false,
-            &quot;cwd&quot;: &quot;${workspaceFolder}&quot;,
-            &quot;environment&quot;: [],
-            &quot;externalConsole&quot;: false,
-            &quot;MIMode&quot;: &quot;lldb&quot;
-        }
-    ]
+<p>简要分析<br>
+首先<code>max_processed</code>限制了每次最大只能处理200个任务</p>
+<pre><code class="language-c">if (unlikely(!rq_next)) {
+    rq_next = eb32_lookup_ge(&amp;rqueue, rqueue_ticks - TIMER_LOOK_BACK);
+    if (!rq_next) {
+        /* we might have reached the end of the tree, typically because
+         * &lt;rqueue_ticks&gt; is in the first half and we're first scanning
+         * the last half. Let's loop back to the beginning of the tree now.
+         */
+        rq_next = eb32_first(&amp;rqueue);
+        if (!rq_next)
+            break;
+    }
 }
 </code></pre>
-<p>这个配置是用于调试环境下的，执行二进制程序环境的命令，以及使用的调试工具gdb/lldb。</p>
+<p>如果下一个处理的任务为空，那么将回到队列的最前方。</p>
+<pre><code class="language-c">t = eb32_entry(rq_next, struct task, rq);
+rq_next = eb32_next(rq_next);
+__task_unlink_rq(t);
+</code></pre>
+<p>我们获取到下一个任务之后，清除任务的队列信息，也就是删除当前的树节点</p>
+<pre><code class="language-c">if (likely(t-&gt;process == process_stream))
+	t = process_stream(t);
+else
+	t = t-&gt;process(t);
+
+if (likely(t != NULL)) {
+	t-&gt;state &amp;= ~TASK_RUNNING;
+	if (t-&gt;expire)
+		task_queue(t);
+}
+</code></pre>
+<p>判断如果是处理请求的话，使用<code>process_stream</code>，还有其他多种情况，比如：</p>
+<ul>
+<li>process_check</li>
+<li>server_warmup</li>
+<li>process_email_alert</li>
+<li>dns_process_resolve</li>
+<li>session_expire_embryonic</li>
+</ul>
+<h2 id="process_stream">process_stream</h2>
+<p>这个函数只怕是有几千行哦，又长又臭：）<br>
+这个是haproxy处理任务的核心函数，代码内有一段注释说明。</p>
+<blockquote>
+<p>Processes the client, server, request and response jobs of a stream task, then puts it back to the wait queue in a clean state</p>
+</blockquote>
+<p>然后进行一些初始化工作</p>
+<pre><code class="language-c">struct channel *req, *res;
+struct stream_interface *si_f, *si_b;
+
+req = &amp;s-&gt;req;
+res = &amp;s-&gt;res;
+
+si_f = &amp;s-&gt;si[0];
+si_b = &amp;s-&gt;si[1];
+</code></pre>
+<p><code>si_f</code>生产者，对应的是frontend端的句柄；而<code>si_b</code>为消费者，对应的backend端的句柄。</p>
+<pre><code class="language-c">if (unlikely(s-&gt;pending_events &amp; TASK_WOKEN_TIMER)) {
+    ...
+    
+    goto update_exp_and_leave
+}
+</code></pre>
+<p>此条件判断是否有超时事件，<code>TASK_WOKEN_TIMER</code>在任务超时的时候会被唤醒，然后开始检查<code>si_f</code>、<code>si_b</code>、<code>req channel</code>和<code>res channel</code>，随之将连接关闭。</p>
+<p>然后进入<code>update_exp_and_leave</code>函数，此函数会将初始化过期时间，是其内部实现的一个ticks。释放buffer之后，使用<code>stream_res_wakeup</code>函数将其重新加入队列。</p>
+<pre><code class="language-c">if (si_b-&gt;state == SI_ST_CON) {
+	if (unlikely(!sess_update_st_con_tcp(s)))
+		sess_update_st_cer(s);
+	else if (si_b-&gt;state == SI_ST_EST)
+		sess_establish(s);
+}
+</code></pre>
+<p>如果是状态为SI_ST_CON（发起连接请求），则进入此流程。检查连接是否是正常，<code>sess_update_st_con_tcp</code>检查连接，如果之前的连接建立失败了，使用<code>sess_update_st_cer</code>处理善后事宜，清空session等操作，如果需要重试的话，则使用<code>process_srv_queue</code>重新进入proxy queue。</p>
+<p>如果状态是SI_ST_EST，说明连接建立成功，使用<code>sess_establish</code>初始化一些参数。</p>
+<h3 id="resync_stream_interface">resync_stream_interface</h3>
+<p>作为子分支存在，主要用于检测连接可用性。</p>
+<pre><code class="language-c">if (unlikely(si_f-&gt;state == SI_ST_DIS))
+	si_f-&gt;state = SI_ST_CLO;
+
+if (unlikely(si_b-&gt;state == SI_ST_DIS)) {
+	si_b-&gt;state = SI_ST_CLO;
+	srv = objt_server(s-&gt;target);
+	if (srv) {
+		if (s-&gt;flags &amp; SF_CURR_SESS) {
+			s-&gt;flags &amp;= ~SF_CURR_SESS;
+			srv-&gt;cur_sess--;
+		}
+		sess_change_server(s, NULL);
+		if (may_dequeue_tasks(srv, s-&gt;be))
+			process_srv_queue(srv);
+	}
+}
+</code></pre>
+<p><code>may_dequeue_tasks</code> 用于判断是否有必要开始下个连接</p>
+<ul>
+<li><code>s-&gt;nbpend</code> 等待处理的连接数</li>
+<li><code>srv_is_usable</code> 是否有可用的服务器</li>
+<li><code>maxconn</code> 最大连接数等</li>
+</ul>
+<p><code>process_srv_queue</code> 检测proxy queue的是否有正在等待处理的连接，并将它们全部唤醒。</p>
+<h3 id="resync_request">resync_request</h3>
+<p>用于分析请求，主要函数</p>
+<ul>
+<li>tcp_inspect_request</li>
+<li>http_wait_for_request</li>
+<li>http_wait_for_request_body</li>
+<li>http_process_req_common</li>
+<li>process_switching_rules</li>
+<li>tcp_inspect_request</li>
+<li>http_process_req_common</li>
+<li>process_server_rules</li>
+<li>http_process_request</li>
+<li>process_sticking_rules</li>
+<li>http_request_forward_body</li>
+</ul>
+<h3 id="resync_response">resync_response</h3>
+<ul>
+<li>tcp_inspect_response</li>
+<li>http_wait_for_response</li>
+<li>process_store_rules</li>
+<li>http_process_res_common</li>
+<li>http_response_forward_body</li>
+</ul>
 
                         </div>
                         
@@ -286,8 +408,13 @@ make install PREFIX=/opt/haproxy
                                 <ul class="markdownIt-TOC">
 <li>
 <ul>
-<li><a href="#%E5%9F%BA%E7%A1%80%E7%8E%AF%E5%A2%83%E9%85%8D%E7%BD%AE">基础环境配置</a></li>
-<li><a href="#vscode-%E9%85%8D%E7%BD%AE">vscode 配置</a></li>
+<li><a href="#process_stream">process_stream</a>
+<ul>
+<li><a href="#resync_stream_interface">resync_stream_interface</a></li>
+<li><a href="#resync_request">resync_request</a></li>
+<li><a href="#resync_response">resync_response</a></li>
+</ul>
+</li>
 </ul>
 </li>
 </ul>
@@ -305,7 +432,7 @@ make install PREFIX=/opt/haproxy
 
                                                 <p class="copyright-item">
                                                     <span>&#x6C38;&#x4E45;&#x94FE;&#x63A5;:</span>
-                                                    <span><a href="https://blog.xwl.io/post/tS0UUUJy6/">https://blog.xwl.io/post/tS0UUUJy6/</a></span>
+                                                    <span><a href="https://blog.xwl.io/post/TZUaQzhYM/">https://blog.xwl.io/post/TZUaQzhYM/</a></span>
                                                 </p>
 
                                                 <p class="copyright-item">
@@ -320,9 +447,9 @@ make install PREFIX=/opt/haproxy
                                                                     <span style="margin-right:15px">
                         <i class="post-share"></i>
                         <span>&#x5206;&#x4EAB;:</span>
-                                                                    <a title="QR 码" target="_blank" href="https://api.qrserver.com/v1/create-qr-code/?size=150x150&data=https://blog.xwl.io/post/tS0UUUJy6/"><i class="fa fa-qrcode"></i></a>
-                                                                    <a title="QQ" target="_blank" href="https://sns.qzone.qq.com/cgi-bin/qzshare/cgi_qzshare_onekey?url=https://blog.xwl.io/post/tS0UUUJy6/&sharesource=qzone&title=使用vscode调试haproxy&pics=https://blog.xwl.io/images/avatar.png?v=1618674870293&summary="><i class="fa fa-qq"></i></a>
-                                                                    <a title="新浪微博" target="_blank" href="https://service.weibo.com/share/share.php?url=https://blog.xwl.io/post/tS0UUUJy6/&sharesource=weibo&title=使用vscode调试haproxy + " - " + &pic="https://blog.xwl.io/images/avatar.png?v=1618674870293 "><i class="fa fa-weibo "></i></a>
+                                                                    <a title="QR 码" target="_blank" href="https://api.qrserver.com/v1/create-qr-code/?size=150x150&data=https://blog.xwl.io/post/TZUaQzhYM/"><i class="fa fa-qrcode"></i></a>
+                                                                    <a title="QQ" target="_blank" href="https://sns.qzone.qq.com/cgi-bin/qzshare/cgi_qzshare_onekey?url=https://blog.xwl.io/post/TZUaQzhYM/&sharesource=qzone&title=haproxy源码阅读（二）处理任务流程&pics=https://blog.xwl.io/images/avatar.png?v=1618674870293&summary="><i class="fa fa-qq"></i></a>
+                                                                    <a title="新浪微博" target="_blank" href="https://service.weibo.com/share/share.php?url=https://blog.xwl.io/post/TZUaQzhYM/&sharesource=weibo&title=haproxy源码阅读（二）处理任务流程 + " - " + &pic="https://blog.xwl.io/images/avatar.png?v=1618674870293 "><i class="fa fa-weibo "></i></a>
 
                                                                     </span>
                                                                     
@@ -352,13 +479,9 @@ make install PREFIX=/opt/haproxy
                                                                                 <!---->
                                                                                 <section class="post-nav">
                                                                                     
-                                                                                        <a class="prev" rel="prev" href="https://blog.xwl.io/post/s5EVafZW4/">
-                                                                                            haproxy源码阅读（一）主循环流程
-                                                                                        </a>
-                                                                                        
                                                                                             
-                                                                                                <a class="next" rel="next" href="https://blog.xwl.io/post/sMLLztYXw/">
-                                                                                                    别让我们的野心配不上才华｜圈圈@TEDx
+                                                                                                <a class="next" rel="next" href="https://blog.xwl.io/post/s5EVafZW4/">
+                                                                                                    haproxy源码阅读（一）主循环流程
                                                                                                 </a>
                                                                                                 
                                                                                 </section>
