@@ -1,5 +1,5 @@
 <!DOCTYPE html>
-<html lang="en">
+<html>
 
 <head>
     <meta charset="utf-8" />
@@ -46,38 +46,10 @@
                                 })();
                             </script>
                             
-        <script src="/media/gridea-search/fuse.js"></script>
-        <script src="/media/gridea-search/ejs.min.js"></script>
-        <script src="/media/gridea-search/gridea-search.js"></script>
-        <script src="/media/gridea-search/result-template.ejs" type="text/ejs"></script>
-        <style>
-            .main_ {
-                display: flex;
-                flex-direction: column;
-                width: 100%;
-                height: 90vh;
-            }
-            
-            .result-box {
-                margin-top: 50px;
-                display: flex;
-                border-radius: 5px;
-                -webkit-box-sizing: border-box;
-                -moz-box-sizing: border-box;
-                box-sizing: border-box;
-                margin-left: auto;
-                margin-right: auto;
-            }
-        </style>
 </head>
 
 <body>
-    <style>
-        .searched-keyword {
-            background-color: green;
-        }
-    </style>
-    <div class="main_">
+    <div class="wrapper">
         <header>
     <nav class="navbar">
         <div class="container">
@@ -221,15 +193,144 @@
         })
     </script>
     
-            <div class="result-box">
-                <div id="gridea-search-result">
-                    <p class="searching">搜索中......</p>
-                    <p class="no-result" style="display:none">未搜索到相关文章</p>
+            <div class="main">
+                <div class="container">
+                    <article class="post-wrap">
+                        <header class="post-header">
+                            <h1 class="post-title">
+                                关于本站服务构建
+                            </h1>
+                            
+                                    <!--zh-->
+                                    <div class="post-meta zh">
+                                        &#x4F5C;&#x8005;:
+                                        <a itemprop="author" rel="author" href="/">
+                                            许大仙
+                                        </a>
+                                        <span class="post-time">&#x65E5;&#x671F;: <a href="#">2021-04-01</a></span>
+                                        <span class="post-readtime">&#x9605;&#x8BFB;&#x65F6;&#x95F4;:<a
+                                    href="#">0.8
+                                    &#x5206;&#x949F;</a></span>
+                                        <span class="post-words">&#x5B57;&#x6570;:<a href="#">235</a></span>
+                                        
+                                            <span class="post-category">&#x5206;&#x7C7B;:
+                                
+                                <a href="https://blog.xwl.io/tag/undefined/">未归档</a>
+                                
+                            </span>
+                                            
+                                                阅读量:
+                                                <span data-hk-page="current"> - </span>
+                                                
+                                    </div>
+                                    
+                        </header>
+                        
+                        <div class="post-content">
+                            <h2 id="简介">简介</h2>
+<p>本站基于<a href="https://github.com/getgridea/gridea">Gridea</a>构建</p>
+<p>也曾折腾过Wordpress、Ghost、Hexo、Hugo等博客，在来回迁移的痛苦中，缺没有多少文章产出。</p>
+<p>但请不要忘记初心❤️</p>
+<h2 id="gridea的同步问题">Gridea的同步问题</h2>
+<p>经常因为网络问题，出现同步失败的情况，是因为Github被强的缘故，使用<a href="http://ping.chinaz.com">Ping工具</a>去检查一下，然后找个延迟低的IP地址，替换一下Host即可。</p>
+<h2 id="对比">对比</h2>
+<p>Wordpress：什么都有，唯一的毛病都是慢。<br>
+Ghost：生态不错，但考虑到国内的网络环境和本地化程度，只适合做英文站<br>
+Hexo：折腾型选手，文章过多编译时太慢<br>
+Hugo：折腾型选手，编译效率上去了，但是写文章体验不是很好<br>
+Gridea：有独立客户端，几乎没有生态，但用起来很方便，适合专注创作的朋友。</p>
+<h2 id="总结">总结</h2>
+<p>中文博客推荐Gridea，而英文站推荐<a href="https://github.com/tryghost/ghost">Ghost</a>。</p>
+
+                        </div>
+                        
+                            <div class="post-toc">
+                                <ul class="markdownIt-TOC">
+<li>
+<ul>
+<li><a href="#%E7%AE%80%E4%BB%8B">简介</a></li>
+<li><a href="#gridea%E7%9A%84%E5%90%8C%E6%AD%A5%E9%97%AE%E9%A2%98">Gridea的同步问题</a></li>
+<li><a href="#%E5%AF%B9%E6%AF%94">对比</a></li>
+<li><a href="#%E6%80%BB%E7%BB%93">总结</a></li>
+</ul>
+</li>
+</ul>
+
+                            </div>
+                            
+                                
+                                    
+                                            <!--zh-->
+                                            <section class="post-copyright zh">
+                                                <p class="copyright-item ">
+                                                    <span>&#x4F5C;&#x8005;:</span>
+                                                    <span>许大仙</span>
+                                                </p>
+
+                                                <p class="copyright-item">
+                                                    <span>&#x6C38;&#x4E45;&#x94FE;&#x63A5;:</span>
+                                                    <span><a href="https://blog.xwl.io/post/5wRgq8uqf/">https://blog.xwl.io/post/5wRgq8uqf/</a></span>
+                                                </p>
+
+                                                <p class="copyright-item">
+                                                    <span>&#x534F;&#x8BAE;:</span>
+                                                    <span>MIT License</span>
+                                                </p>
+                                            </section>
+                                            
+                                                
+                                                    
+                                                                    <!--Share-->
+                                                                    <span style="margin-right:15px">
+                        <i class="post-share"></i>
+                        <span>&#x5206;&#x4EAB;:</span>
+                                                                    <a title="QR 码" target="_blank" href="https://api.qrserver.com/v1/create-qr-code/?size=150x150&data=https://blog.xwl.io/post/5wRgq8uqf/"><i class="fa fa-qrcode"></i></a>
+                                                                    <a title="QQ" target="_blank" href="https://sns.qzone.qq.com/cgi-bin/qzshare/cgi_qzshare_onekey?url=https://blog.xwl.io/post/5wRgq8uqf/&sharesource=qzone&title=关于本站服务构建&pics=https://blog.xwl.io/images/avatar.png?v=1618681638595&summary="><i class="fa fa-qq"></i></a>
+                                                                    <a title="新浪微博" target="_blank" href="https://service.weibo.com/share/share.php?url=https://blog.xwl.io/post/5wRgq8uqf/&sharesource=weibo&title=关于本站服务构建 + " - " + &pic="https://blog.xwl.io/images/avatar.png?v=1618681638595 "><i class="fa fa-weibo "></i></a>
+
+                                                                    </span>
+                                                                    
+                                                                            <!--zh-->
+                                                                            <section class="post-tags zh ">
+                                                                                <div>
+                                                                                    <span>&#x6807;&#x7B7E;:</span>
+                                                                                    <span class="tag ">
+                        
+                        
+                        <a href="https://blog.xwl.io/tag/undefined/">#
+                    未归档
+                        </a>
+                        
+                            
+                                </span>
+                                                                                </div>
+                                                                                <div>
+                                                                                    <a href="javascript:window.history.back();">
+                        &#x8FD4;&#x56DE;</a>
+                                                                                    <span>&dot;</span>
+                                                                                    <a href="#">&#x4E3B;&#x9875;</a>
+                                                                                </div>
+                                                                            </section>
+
+                                                                            
+                                                                                <!---->
+                                                                                <section class="post-nav">
+                                                                                    
+                                                                                        <a class="prev" rel="prev" href="https://blog.xwl.io/post/sMLLztYXw/">
+                                                                                            别让我们的野心配不上才华｜圈圈@TEDx
+                                                                                        </a>
+                                                                                        
+                                                                                            
+                                                                                </section>
+                    </article>
                 </div>
+                
+                                            
             </div>
     </div>
-</body>
-
+    </div>
+    </div>
+    
         <footer id="footer" class="footer">
             <div class="copyright">
                 
@@ -273,3 +374,10 @@
                     console.log(" Blog Update Time: " + newDate.toLocaleDateString());
                     console.log("\n %c \u26a1Theme:Chic Author's Blog:https://blog.itjoker.cn  Write By ITJoker  \n\n", "color: #ffffff; background: rgba(49, 49, 49, 0.85); padding:5px 0;border-radius:5px;");
                 </script>
+        </div>
+</body>
+<script>
+    scroll();
+</script>
+
+</html>
