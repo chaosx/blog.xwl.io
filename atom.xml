@@ -2,7 +2,7 @@
 <feed xmlns="http://www.w3.org/2005/Atom">
     <id>https://blog.xwl.io</id>
     <title>神鬼莫测许大仙</title>
-    <updated>2021-04-13T17:02:18.221Z</updated>
+    <updated>2021-04-17T15:33:46.356Z</updated>
     <generator>https://github.com/jpmonette/feed</generator>
     <link rel="alternate" href="https://blog.xwl.io"/>
     <link rel="self" href="https://blog.xwl.io/atom.xml"/>
@@ -10,6 +10,66 @@
     <logo>https://blog.xwl.io/images/avatar.png</logo>
     <icon>https://blog.xwl.io/favicon.ico</icon>
     <rights>All rights reserved 2021, 神鬼莫测许大仙</rights>
+    <entry>
+        <title type="html"><![CDATA[使用vscode调试haproxy]]></title>
+        <id>https://blog.xwl.io/post/tS0UUUJy6/</id>
+        <link href="https://blog.xwl.io/post/tS0UUUJy6/">
+        </link>
+        <updated>2021-04-17T15:29:08.000Z</updated>
+        <content type="html"><![CDATA[<h2 id="基础环境配置">基础环境配置</h2>
+<p>mac环境下，自带的是clang，在编辑haproxy的时候会出现一系列的warning，所以先安装下gcc，haproxy官方测试通过的只有4.x版本</p>
+<pre><code>brew install gcc@4.9
+</code></pre>
+<p>然后修改haproxy的Makefile，120行。</p>
+<pre><code>CC = /usr/local/Cellar/gcc\@4.9/4.9.4_1/bin/gcc-4.9
+</code></pre>
+<p>编译安装</p>
+<pre><code>make TARGET=osx
+make install PREFIX=/opt/haproxy
+</code></pre>
+<h2 id="vscode-配置">vscode 配置</h2>
+<ul>
+<li>tasks.json</li>
+</ul>
+<pre><code>{
+    &quot;version&quot;: &quot;2.0.0&quot;,
+    &quot;tasks&quot;: [
+        {
+            &quot;label&quot;: &quot;haproxy&quot;,
+            &quot;type&quot;: &quot;shell&quot;,
+            &quot;command&quot;: &quot;sudo make TARGET=osx &amp;&amp; sudo make install PREFIX=/opt/haproxy &amp;&amp; sudo make clean&quot;,
+            &quot;problemMatcher&quot;: [
+                &quot;$gcc&quot;
+            ]
+        }
+    ]
+}
+</code></pre>
+<p>此时运行任务的时候就自动执行tasks.json的任务，进行编译，完成之后就能顺利调试。</p>
+<ul>
+<li>launch.json</li>
+</ul>
+<pre><code>{
+    &quot;version&quot;: &quot;0.2.0&quot;,
+    &quot;configurations&quot;: [
+        {
+            &quot;name&quot;: &quot;(gdb) Launch&quot;,
+            &quot;type&quot;: &quot;cppdbg&quot;,
+            &quot;request&quot;: &quot;launch&quot;,
+            &quot;program&quot;: &quot;/opt/haproxy/sbin/haproxy&quot;,
+            &quot;args&quot;: [&quot;-f&quot;, &quot;/opt/haproxy/etc/haproxy.cfg&quot;],
+            &quot;stopAtEntry&quot;: false,
+            &quot;cwd&quot;: &quot;${workspaceFolder}&quot;,
+            &quot;environment&quot;: [],
+            &quot;externalConsole&quot;: false,
+            &quot;MIMode&quot;: &quot;lldb&quot;
+        }
+    ]
+}
+</code></pre>
+<p>这个配置是用于调试环境下的，执行二进制程序环境的命令，以及使用的调试工具gdb/lldb。</p>
+]]></content>
+    </entry>
     <entry>
         <title type="html"><![CDATA[别让我们的野心配不上才华｜圈圈@TEDx]]></title>
         <id>https://blog.xwl.io/post/sMLLztYXw/</id>
