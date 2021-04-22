@@ -2,7 +2,7 @@
 <feed xmlns="http://www.w3.org/2005/Atom">
     <id>https://blog.xwl.io</id>
     <title>神鬼莫测许大仙</title>
-    <updated>2021-04-22T13:28:39.252Z</updated>
+    <updated>2021-04-22T14:39:39.532Z</updated>
     <generator>https://github.com/jpmonette/feed</generator>
     <link rel="alternate" href="https://blog.xwl.io"/>
     <link rel="self" href="https://blog.xwl.io/atom.xml"/>
@@ -10,6 +10,99 @@
     <logo>https://blog.xwl.io/images/avatar.png</logo>
     <icon>https://blog.xwl.io/favicon.ico</icon>
     <rights>All rights reserved 2021, 神鬼莫测许大仙</rights>
+    <entry>
+        <title type="html"><![CDATA[kubernetes基础架构]]></title>
+        <id>https://blog.xwl.io/post/hhkktAeFo/</id>
+        <link href="https://blog.xwl.io/post/hhkktAeFo/">
+        </link>
+        <updated>2021-04-22T13:46:29.000Z</updated>
+        <content type="html"><![CDATA[<h2 id="基础组件">基础组件</h2>
+<p><img src="https://blog.xwl.io/post-images/1619099263782.jpg" alt="" loading="lazy"><br>
+上图是kubernetes的基本组成部分，以下将简单描述一下其组件及其功能。</p>
+<h3 id="master">Master</h3>
+<ul>
+<li>API Server：管理集群资源的唯一入口</li>
+<li>Controller-Manager：一个资源对应一个控制器
+<ul>
+<li>Node Controller</li>
+<li>Deployment Controller</li>
+<li>Namespace Controller</li>
+<li>...</li>
+</ul>
+</li>
+<li>Scheduler：节点调度，选择Worker节点部署
+<ul>
+<li>Filter：选择符合Pod Spce描述的Node</li>
+<li>Score：打分和排序</li>
+<li>Reserve：缓存数据，表示这个Pod已经分配到这个Node上</li>
+</ul>
+</li>
+<li>etcd：用于存储集群相关的数据</li>
+</ul>
+<h3 id="worker">Worker</h3>
+<ul>
+<li>kube-proxy：提供网络代理、负载均衡
+<ul>
+<li>实现的Proxy Mode支持iptables、ipvs <a href="https://kubernetes.io/docs/concepts/services-networking/service/#virtual-ips-and-service-proxies?_blank">Virtual IPs and service proxies</a></li>
+<li>扩展阅读：<a href="https://www.cnblogs.com/tencent-cloud-native/p/13566340.html">性能提升40%: 腾讯 TKE 用 eBPF 绕过 conntrack 优化 K8s Service</a></li>
+</ul>
+</li>
+<li>kubelet：管理本机的容器
+<ul>
+<li>基于 PodSpec 来工作的，每个 PodSpec 是一个描述 Pod 的 YAML 或 JSON 对象。</li>
+</ul>
+</li>
+</ul>
+<h2 id="身份验证">身份验证</h2>
+<p>每一次的访问请求都需要进行合法性的检验，其中包括身份验证、操作权限验证以及操作规范验证等，需要通过一系列验证通过之后才能访问。</p>
+<h3 id="工作流程">工作流程</h3>
+<ol>
+<li>认证：验证账号的有效性</li>
+<li>鉴权：拥有哪些访问权限</li>
+<li>准入控制：自定义插件，API请求拦截器，它可以更改请求对象，甚至完全拒绝请求。</li>
+</ol>
+<h3 id="认证">认证</h3>
+<p>拥有三种认证方式，分别是：</p>
+<ul>
+<li>Http Basic Authentication</li>
+<li>基于证书认证（CA）</li>
+<li>基于token认证</li>
+</ul>
+<h3 id="鉴权">鉴权</h3>
+<p>基于RBAC，也就是角色访问控制。通俗的说，就是将权限赋予给角色，然后将角色绑定要用户主体上。</p>
+<ul>
+<li>主体
+<ul>
+<li>user</li>
+<li>group</li>
+</ul>
+</li>
+<li>角色
+<ul>
+<li>role：特定命名空间访问权限</li>
+<li>ClusterRole：所有命名空间访问角色</li>
+</ul>
+</li>
+<li>角色绑定
+<ul>
+<li>RoleBinding：角色绑定到主体</li>
+<li>ClusterRoleBinding：集群角色绑定到主体</li>
+</ul>
+</li>
+</ul>
+<h3 id="准入控制">准入控制</h3>
+<blockquote>
+<p>我从网上扒了一个例子，供参考</p>
+</blockquote>
+<p>去年曝光的 runC 漏洞（CVE-2019-5736），它被利用的原因之一就是容器内进程都是以 root 权限运行的。下面我们以这个问题为例，一起利用准入控制器 webhook 建立自定义安全策略。</p>
+<p>为了解决上述问题，工程师可以使用自定义的变更准入控制器 Webhook 使默认设置变得更安全：除非明确要求，否则 webhook 将强制要求 Pod 以非 root 身份运行（示例中为分配 ID 1234）。</p>
+<p>请注意，这个设置不会影响到集群中的工作负载，包括那些明确需要 root 权限的工作负载。</p>
+<p>完整代码请见以下 <a href="https://github.com/stackrox/admission-controller-webhook-demo">admission-controller-webhook-demo</a></p>
+<h2 id="pod-启动流程">Pod 启动流程</h2>
+<p>最后给大家分享一下容器的完整创建流程，对此有一个大概的认知。</p>
+<figure data-type="image" tabindex="1"><img src="https://blog.xwl.io/post-images/1619101364760.jpg" alt="" loading="lazy"></figure>
+]]></content>
+    </entry>
     <entry>
         <title type="html"><![CDATA[haproxy源码阅读（二）处理任务流程]]></title>
         <id>https://blog.xwl.io/post/TZUaQzhYM/</id>
