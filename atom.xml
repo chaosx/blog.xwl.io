@@ -1,15 +1,15 @@
 <?xml version="1.0" encoding="utf-8"?>
 <feed xmlns="http://www.w3.org/2005/Atom">
     <id>https://blog.xwl.io</id>
-    <title>神鬼莫测许大仙</title>
-    <updated>2021-04-22T17:31:57.839Z</updated>
+    <title>许大仙的博客</title>
+    <updated>2021-04-23T16:18:05.869Z</updated>
     <generator>https://github.com/jpmonette/feed</generator>
     <link rel="alternate" href="https://blog.xwl.io"/>
     <link rel="self" href="https://blog.xwl.io/atom.xml"/>
-    <subtitle>大仙大仙法力无边</subtitle>
+    <subtitle>一个运维人的成长历程</subtitle>
     <logo>https://blog.xwl.io/images/avatar.png</logo>
     <icon>https://blog.xwl.io/favicon.ico</icon>
-    <rights>All rights reserved 2021, 神鬼莫测许大仙</rights>
+    <rights>All rights reserved 2021, 许大仙的博客</rights>
     <entry>
         <title type="html"><![CDATA[kubernetes基础架构]]></title>
         <id>https://blog.xwl.io/post/hhkktAeFo/</id>
@@ -569,7 +569,7 @@ make install PREFIX=/opt/haproxy
         <updated>2021-03-31T17:20:49.000Z</updated>
         <content type="html"><![CDATA[<h2 id="简介">简介</h2>
 <p>本站基于<a href="https://github.com/getgridea/gridea">Gridea</a>构建</p>
-<p>也曾折腾过Wordpress、Ghost、Hexo、Hugo等博客，在来回迁移的痛苦中，缺没有多少文章产出。</p>
+<p>也曾折腾过Wordpress、Ghost、Hexo、Hugo等博客，在来回迁移的痛苦中，却没有多少文章产出。</p>
 <p>但请不要忘记初心❤️</p>
 <h2 id="gridea的同步问题">Gridea的同步问题</h2>
 <p>经常因为网络问题，出现同步失败的情况，是因为Github被墙的缘故，使用<a href="http://ping.chinaz.com">Ping工具</a>去检查一下，然后找个延迟低的IP地址，替换一下Host即可。</p>
