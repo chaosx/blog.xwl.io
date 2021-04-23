@@ -2,7 +2,7 @@
 <feed xmlns="http://www.w3.org/2005/Atom">
     <id>https://blog.xwl.io</id>
     <title>许大仙的博客</title>
-    <updated>2021-04-23T16:21:41.711Z</updated>
+    <updated>2021-04-23T16:58:21.523Z</updated>
     <generator>https://github.com/jpmonette/feed</generator>
     <link rel="alternate" href="https://blog.xwl.io"/>
     <link rel="self" href="https://blog.xwl.io/atom.xml"/>
@@ -10,6 +10,29 @@
     <logo>https://blog.xwl.io/images/avatar.png</logo>
     <icon>https://blog.xwl.io/favicon.ico</icon>
     <rights>All rights reserved 2021, 许大仙的博客</rights>
+    <entry>
+        <title type="html"><![CDATA[Kubernetes学习路径 & 教程]]></title>
+        <id>https://blog.xwl.io/post/WpUHlquQY/</id>
+        <link href="https://blog.xwl.io/post/WpUHlquQY/">
+        </link>
+        <updated>2021-04-23T16:31:44.000Z</updated>
+        <content type="html"><![CDATA[<p>本文学习路径抄录了该项目大量文字 <a href="https://github.com/caicloud/kube-ladder">kube-ladder</a>，相关知识会慢慢补齐。</p>
+<h2 id="一入门篇">一，入门篇</h2>
+<ul>
+<li>Kubernetes 的背景和优势</li>
+<li>Kubernetes 环境的安装部署</li>
+<li>Kubernetes 常用资源的使用方法</li>
+</ul>
+<p>包括不限于Node、Pod、Service、Deployment、Namespace、ConfigMap、Secret。</p>
+<h2 id="二深入篇">二，深入篇</h2>
+<p>目标是了解Kubernetes的架构的核心组成部分，及其工作原理，容器从启动到结束整个生命周期的过程。</p>
+<ul>
+<li><a href="/post/hhkktAeFo/">Kubernetes 的基础架构</a></li>
+<li>Kubernetes 容器调度的基本流程</li>
+</ul>
+<p>运维人员基本做到这一步就可以了，下面的内容将会涉及到开发。</p>
+]]></content>
+    </entry>
     <entry>
         <title type="html"><![CDATA[kubernetes基础架构]]></title>
         <id>https://blog.xwl.io/post/hhkktAeFo/</id>
