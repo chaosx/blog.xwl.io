@@ -2,7 +2,7 @@
 <feed xmlns="http://www.w3.org/2005/Atom">
     <id>https://blog.xwl.io</id>
     <title>许大仙的博客</title>
-    <updated>2021-05-01T18:32:04.188Z</updated>
+    <updated>2021-05-02T12:30:51.425Z</updated>
     <generator>https://github.com/jpmonette/feed</generator>
     <link rel="alternate" href="https://blog.xwl.io"/>
     <link rel="self" href="https://blog.xwl.io/atom.xml"/>
@@ -10,6 +10,118 @@
     <logo>https://blog.xwl.io/images/avatar.png</logo>
     <icon>https://blog.xwl.io/favicon.ico</icon>
     <rights>All rights reserved 2021, 许大仙的博客</rights>
+    <entry>
+        <title type="html"><![CDATA[Kubernetes容器的启动/删除流程]]></title>
+        <id>https://blog.xwl.io/post/SGNGDyGh1/</id>
+        <link href="https://blog.xwl.io/post/SGNGDyGh1/">
+        </link>
+        <updated>2021-05-02T10:03:08.000Z</updated>
+        <content type="html"><![CDATA[<h2 id="基本介绍">基本介绍</h2>
+<p>首先展示一张简单的架构图，会发现所有的流程几乎都是是通过api server通信的。</p>
+<figure data-type="image" tabindex="1"><img src="https://blog.xwl.io/post-images/1619949957372.jpg" alt="" loading="lazy"></figure>
+<p>在开始之前先区分一些概念<br>
+• Pod：拥有一个Pod IP，是一个或一组容器组成。<br>
+• Service：为Pod实现负载均衡<br>
+• Endpoints：Endpoints表示了一个Service对应的所有Pod副本的访问地址，它负责监听Service和对应的Pod副本的变化。<br>
+• Ingress：通过Service获取其同名的Endpoints对象，使用是Endpoints存储的IP地址。</p>
+<p>至于它们的关系，照惯例还是上个图比较清晰一些。</p>
+<figure data-type="image" tabindex="2"><img src="https://blog.xwl.io/post-images/1619950002640.jpg" alt="" loading="lazy"></figure>
+<h2 id="创建pod">创建Pod</h2>
+<p>我们先大概看一下pod创建的整个流程。</p>
+<figure data-type="image" tabindex="3"><img src="https://blog.xwl.io/post-images/1619950059160.jpg" alt="" loading="lazy"></figure>
+<p>基本分为三个部分：</p>
+<ol>
+<li>通过各种方式去调用api server的接口，然后它会按照一定的格式存入etcd</li>
+<li>Master节点上的 Scheduler 监听api server
+<ul>
+<li>Scheduler：简单的说就是通过一定的算法，把这个Pod分配到某个Worker节点上</li>
+</ul>
+</li>
+<li>Worker节点上的 Kubelet 监听api server
+<ol>
+<li>创建容器（CRI）</li>
+<li>创建网络（CNI）</li>
+<li>创建存储（CSI）</li>
+<li>分配IP地址</li>
+<li>更新Pod状态</li>
+</ol>
+</li>
+</ol>
+<p>以上流程没有涉及到Worker上的另一个组件，也就是Kube-proxy。</p>
+<h2 id="删除pod">删除Pod</h2>
+<p>流程比较简单，也是通过api server去同步配置存储到etcd，然后Kubelet收到通知后负责删除Pod。</p>
+<p>但Kubelet的步骤却完全相反，分别是：</p>
+<ol>
+<li>删除存储（CSI）</li>
+<li>删除网络（CNI）</li>
+<li>删除容器（CRI）</li>
+</ol>
+<p>在删除Pod的时候，会同时删除endpoint，kubelet也会接收到信号。</p>
+<p>由于事件是并行的，可能会产生没有即时同步的情况，也就是endpoint还没有完成同步的时候，Pod已经同步完成了，这个时候访问就会出现问题。</p>
+<p>如下图所示，运气最好的时候，也就是在endpoint完全同步之后，Pod才被删除。</p>
+<figure data-type="image" tabindex="4"><img src="https://blog.xwl.io/post-images/1619950256119.jpg" alt="" loading="lazy"></figure>
+<p>怎么样保证优雅的删除呢？通常有以下几种方法：</p>
+<ul>
+<li>当Pod即将被删除时，会收到SIGTERM信号，应用程序可以捕获该信号并开始关闭。</li>
+</ul>
+<p>默认情况下，Kubernetes 将发送 SIGTERM 信号并等待 30 秒，然后强制终止该进程。</p>
+<ul>
+<li>使用preStop钩子，等待15秒</li>
+</ul>
+<p>以下是一个最简单的示例</p>
+<pre><code class="language-yaml">apiVersion: v1
+kind: Pod
+metadata:
+  name: my-pod
+spec:
+  containers:
+    - name: web
+      image: nginx
+      ports:
+        - name: web
+          containerPort: 80
+      lifecycle:
+        preStop:
+          exec:
+            command: [&quot;sleep&quot;, &quot;15&quot;]
+</code></pre>
+<p>那么它的流程会变成这样</p>
+<figure data-type="image" tabindex="5"><img src="https://blog.xwl.io/post-images/1619950351101.jpg" alt="" loading="lazy"></figure>
+<p>仔细的朋友可能注意到有个Gracefule shutdown环节，此部分用于处理应用程序的优雅关闭。</p>
+<p>假如你启动的是Nginx服务，那么YAML配置将会变成这样</p>
+<pre><code class="language-yaml">apiVersion: v1
+kind: Pod
+metadata:
+  name: my-pod
+spec:
+  containers:
+    - name: web
+      image: nginx
+      ports:
+        - name: web
+          containerPort: 80
+      lifecycle:
+        preStop:
+          exec:
+            command: [&quot;sleep&quot;, &quot;15&quot;, &quot;&amp;&amp;&quot;, &quot;nginx&quot;, &quot;-s&quot;, &quot;stop&quot;]
+</code></pre>
+<h2 id="更新pod">更新Pod</h2>
+<p>如果您有三个副本，并且一旦提交新的 YAML 资源 Kubernetes，则：</p>
+<ul>
+<li>用新的容器镜像创建一个 Pod。</li>
+<li>销毁现有的 Pod。</li>
+<li>等待 Pod 准备就绪。</li>
+</ul>
+<p>并重复上述步骤，直到所有 Pod 都迁移到较新的版本。</p>
+<p>Kubernetes 仅在新的 Pod 准备好接收流量（通过 Readiness 检查）之后才重复每个周期。</p>
+<p>这里顺便介绍一下Pod需要关注的两个探针</p>
+<ul>
+<li>liveness：存活检测，如果探测失败了将会杀死容器。</li>
+<li>readiness：就绪检测，检测容器是否准备好提供服务。</li>
+</ul>
+<p>具体配置就不在这里详细叙述了。</p>
+]]></content>
+    </entry>
     <entry>
         <title type="html"><![CDATA[来自长假第一天的挣扎]]></title>
         <id>https://blog.xwl.io/post/tgfaCQjnt/</id>
@@ -138,7 +250,7 @@ end
 <p>目标是了解Kubernetes的架构的核心组成部分，及其工作原理，容器从启动到结束整个生命周期的过程。</p>
 <ul>
 <li><a href="/post/hhkktAeFo/">Kubernetes 的基础架构</a></li>
-<li>Kubernetes 容器调度的基本流程</li>
+<li><a href="/post/SGNGDyGh1/">Kubernetes 容器调度的基本流程</a></li>
 </ul>
 <p>运维人员基本做到这一步就可以了，下面的内容将会涉及到开发。</p>
 <h2 id="集成篇">集成篇</h2>

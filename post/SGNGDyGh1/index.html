@@ -214,7 +214,7 @@
                     <article class="post-wrap">
                         <header class="post-header">
                             <h1 class="post-title">
-                                kubernetes基础架构
+                                Kubernetes容器的启动/删除流程
                             </h1>
                             
                                     <!--zh-->
@@ -223,11 +223,11 @@
                                         <a itemprop="author" rel="author" href="/">
                                             许大仙
                                         </a>
-                                        <span class="post-time">&#x65E5;&#x671F;: <a href="#">2021-04-22</a></span>
+                                        <span class="post-time">&#x65E5;&#x671F;: <a href="#">2021-05-02</a></span>
                                         <span class="post-readtime">&#x9605;&#x8BFB;&#x65F6;&#x95F4;:<a
-                                    href="#">2.4
+                                    href="#">3.3
                                     &#x5206;&#x949F;</a></span>
-                                        <span class="post-words">&#x5B57;&#x6570;:<a href="#">668</a></span>
+                                        <span class="post-words">&#x5B57;&#x6570;:<a href="#">862</a></span>
                                         
                                             <span class="post-category">&#x5206;&#x7C7B;:
                                 
@@ -243,91 +243,110 @@
                         </header>
                         
                         <div class="post-content">
-                            <h2 id="基础组件">基础组件</h2>
-<p><img src="https://blog.xwl.io/post-images/1619099263782.jpg" alt="" loading="lazy"><br>
-上图是kubernetes的基本组成部分，以下将简单描述一下其组件及其功能。</p>
-<h3 id="master">Master</h3>
-<ul>
-<li>API Server：管理集群资源的唯一入口</li>
-<li>Controller-Manager：一个资源对应一个控制器
-<ul>
-<li>Node Controller</li>
-<li>Deployment Controller</li>
-<li>Namespace Controller</li>
-<li>...</li>
-</ul>
-</li>
-<li>Scheduler：节点调度，选择Worker节点部署
-<ul>
-<li>Filter：选择符合Pod Spce描述的Node</li>
-<li>Score：打分和排序</li>
-<li>Reserve：缓存数据，表示这个Pod已经分配到这个Node上</li>
-</ul>
-</li>
-<li>etcd：用于存储集群相关的数据</li>
-</ul>
-<h3 id="worker">Worker</h3>
-<ul>
-<li>kube-proxy：提供网络代理、负载均衡
-<ul>
-<li>实现的Proxy Mode支持iptables、ipvs <a href="https://kubernetes.io/docs/concepts/services-networking/service/#virtual-ips-and-service-proxies?_blank">Virtual IPs and service proxies</a></li>
-<li>扩展阅读：<a href="https://www.cnblogs.com/tencent-cloud-native/p/13566340.html">性能提升40%: 腾讯 TKE 用 eBPF 绕过 conntrack 优化 K8s Service</a></li>
-</ul>
-</li>
-<li>kubelet：管理本机的容器
-<ul>
-<li>基于 PodSpec 来工作的，每个 PodSpec 是一个描述 Pod 的 YAML 或 JSON 对象。</li>
-</ul>
-</li>
-</ul>
-<h2 id="身份验证">身份验证</h2>
-<p>每一次的访问请求都需要进行合法性的检验，其中包括身份验证、操作权限验证以及操作规范验证等，需要通过一系列验证通过之后才能访问。</p>
-<h3 id="工作流程">工作流程</h3>
+                            <h2 id="基本介绍">基本介绍</h2>
+<p>首先展示一张简单的架构图，会发现所有的流程几乎都是是通过api server通信的。</p>
+<figure data-type="image" tabindex="1"><img src="https://blog.xwl.io/post-images/1619949957372.jpg" alt="" loading="lazy"></figure>
+<p>在开始之前先区分一些概念<br>
+• Pod：拥有一个Pod IP，是一个或一组容器组成。<br>
+• Service：为Pod实现负载均衡<br>
+• Endpoints：Endpoints表示了一个Service对应的所有Pod副本的访问地址，它负责监听Service和对应的Pod副本的变化。<br>
+• Ingress：通过Service获取其同名的Endpoints对象，使用是Endpoints存储的IP地址。</p>
+<p>至于它们的关系，照惯例还是上个图比较清晰一些。</p>
+<figure data-type="image" tabindex="2"><img src="https://blog.xwl.io/post-images/1619950002640.jpg" alt="" loading="lazy"></figure>
+<h2 id="创建pod">创建Pod</h2>
+<p>我们先大概看一下pod创建的整个流程。</p>
+<figure data-type="image" tabindex="3"><img src="https://blog.xwl.io/post-images/1619950059160.jpg" alt="" loading="lazy"></figure>
+<p>基本分为三个部分：</p>
 <ol>
-<li>认证：验证账号的有效性</li>
-<li>鉴权：拥有哪些访问权限</li>
-<li>准入控制：自定义插件，API请求拦截器，它可以更改请求对象，甚至完全拒绝请求。</li>
+<li>通过各种方式去调用api server的接口，然后它会按照一定的格式存入etcd</li>
+<li>Master节点上的 Scheduler 监听api server
+<ul>
+<li>Scheduler：简单的说就是通过一定的算法，把这个Pod分配到某个Worker节点上</li>
+</ul>
+</li>
+<li>Worker节点上的 Kubelet 监听api server
+<ol>
+<li>创建容器（CRI）</li>
+<li>创建网络（CNI）</li>
+<li>创建存储（CSI）</li>
+<li>分配IP地址</li>
+<li>更新Pod状态</li>
 </ol>
-<h3 id="认证">认证</h3>
-<p>拥有三种认证方式，分别是：</p>
-<ul>
-<li>Http Basic Authentication</li>
-<li>基于证书认证（CA）</li>
-<li>基于token认证</li>
-</ul>
-<h3 id="鉴权">鉴权</h3>
-<p>基于RBAC，也就是角色访问控制。通俗的说，就是将权限赋予给角色，然后将角色绑定要用户主体上。</p>
-<ul>
-<li>主体
-<ul>
-<li>user</li>
-<li>group</li>
-</ul>
 </li>
-<li>角色
+</ol>
+<p>以上流程没有涉及到Worker上的另一个组件，也就是Kube-proxy。</p>
+<h2 id="删除pod">删除Pod</h2>
+<p>流程比较简单，也是通过api server去同步配置存储到etcd，然后Kubelet收到通知后负责删除Pod。</p>
+<p>但Kubelet的步骤却完全相反，分别是：</p>
+<ol>
+<li>删除存储（CSI）</li>
+<li>删除网络（CNI）</li>
+<li>删除容器（CRI）</li>
+</ol>
+<p>在删除Pod的时候，会同时删除endpoint，kubelet也会接收到信号。</p>
+<p>由于事件是并行的，可能会产生没有即时同步的情况，也就是endpoint还没有完成同步的时候，Pod已经同步完成了，这个时候访问就会出现问题。</p>
+<p>如下图所示，运气最好的时候，也就是在endpoint完全同步之后，Pod才被删除。</p>
+<figure data-type="image" tabindex="4"><img src="https://blog.xwl.io/post-images/1619950256119.jpg" alt="" loading="lazy"></figure>
+<p>怎么样保证优雅的删除呢？通常有以下几种方法：</p>
 <ul>
-<li>role：特定命名空间访问权限</li>
-<li>ClusterRole：所有命名空间访问角色</li>
+<li>当Pod即将被删除时，会收到SIGTERM信号，应用程序可以捕获该信号并开始关闭。</li>
 </ul>
-</li>
-<li>角色绑定
+<p>默认情况下，Kubernetes 将发送 SIGTERM 信号并等待 30 秒，然后强制终止该进程。</p>
 <ul>
-<li>RoleBinding：角色绑定到主体</li>
-<li>ClusterRoleBinding：集群角色绑定到主体</li>
+<li>使用preStop钩子，等待15秒</li>
 </ul>
-</li>
+<p>以下是一个最简单的示例</p>
+<pre><code class="language-yaml">apiVersion: v1
+kind: Pod
+metadata:
+  name: my-pod
+spec:
+  containers:
+    - name: web
+      image: nginx
+      ports:
+        - name: web
+          containerPort: 80
+      lifecycle:
+        preStop:
+          exec:
+            command: [&quot;sleep&quot;, &quot;15&quot;]
+</code></pre>
+<p>那么它的流程会变成这样</p>
+<figure data-type="image" tabindex="5"><img src="https://blog.xwl.io/post-images/1619950351101.jpg" alt="" loading="lazy"></figure>
+<p>仔细的朋友可能注意到有个Gracefule shutdown环节，此部分用于处理应用程序的优雅关闭。</p>
+<p>假如你启动的是Nginx服务，那么YAML配置将会变成这样</p>
+<pre><code class="language-yaml">apiVersion: v1
+kind: Pod
+metadata:
+  name: my-pod
+spec:
+  containers:
+    - name: web
+      image: nginx
+      ports:
+        - name: web
+          containerPort: 80
+      lifecycle:
+        preStop:
+          exec:
+            command: [&quot;sleep&quot;, &quot;15&quot;, &quot;&amp;&amp;&quot;, &quot;nginx&quot;, &quot;-s&quot;, &quot;stop&quot;]
+</code></pre>
+<h2 id="更新pod">更新Pod</h2>
+<p>如果您有三个副本，并且一旦提交新的 YAML 资源 Kubernetes，则：</p>
+<ul>
+<li>用新的容器镜像创建一个 Pod。</li>
+<li>销毁现有的 Pod。</li>
+<li>等待 Pod 准备就绪。</li>
 </ul>
-<h3 id="准入控制">准入控制</h3>
-<blockquote>
-<p>我从网上扒了一个例子，供参考</p>
-</blockquote>
-<p>去年曝光的 runC 漏洞（CVE-2019-5736），它被利用的原因之一就是容器内进程都是以 root 权限运行的。下面我们以这个问题为例，一起利用准入控制器 webhook 建立自定义安全策略。</p>
-<p>为了解决上述问题，工程师可以使用自定义的变更准入控制器 Webhook 使默认设置变得更安全：除非明确要求，否则 webhook 将强制要求 Pod 以非 root 身份运行（示例中为分配 ID 1234）。</p>
-<p>请注意，这个设置不会影响到集群中的工作负载，包括那些明确需要 root 权限的工作负载。</p>
-<p>完整代码请见以下 <a href="https://github.com/stackrox/admission-controller-webhook-demo">admission-controller-webhook-demo</a></p>
-<h2 id="pod-启动流程">Pod 启动流程</h2>
-<p>最后给大家分享一下容器的完整创建流程，对此有一个大概的认知。</p>
-<figure data-type="image" tabindex="1"><img src="https://blog.xwl.io/post-images/1619101364760.jpg" alt="" loading="lazy"></figure>
+<p>并重复上述步骤，直到所有 Pod 都迁移到较新的版本。</p>
+<p>Kubernetes 仅在新的 Pod 准备好接收流量（通过 Readiness 检查）之后才重复每个周期。</p>
+<p>这里顺便介绍一下Pod需要关注的两个探针</p>
+<ul>
+<li>liveness：存活检测，如果探测失败了将会杀死容器。</li>
+<li>readiness：就绪检测，检测容器是否准备好提供服务。</li>
+</ul>
+<p>具体配置就不在这里详细叙述了。</p>
 
                         </div>
                         
@@ -335,21 +354,10 @@
                                 <ul class="markdownIt-TOC">
 <li>
 <ul>
-<li><a href="#%E5%9F%BA%E7%A1%80%E7%BB%84%E4%BB%B6">基础组件</a>
-<ul>
-<li><a href="#master">Master</a></li>
-<li><a href="#worker">Worker</a></li>
-</ul>
-</li>
-<li><a href="#%E8%BA%AB%E4%BB%BD%E9%AA%8C%E8%AF%81">身份验证</a>
-<ul>
-<li><a href="#%E5%B7%A5%E4%BD%9C%E6%B5%81%E7%A8%8B">工作流程</a></li>
-<li><a href="#%E8%AE%A4%E8%AF%81">认证</a></li>
-<li><a href="#%E9%89%B4%E6%9D%83">鉴权</a></li>
-<li><a href="#%E5%87%86%E5%85%A5%E6%8E%A7%E5%88%B6">准入控制</a></li>
-</ul>
-</li>
-<li><a href="#pod-%E5%90%AF%E5%8A%A8%E6%B5%81%E7%A8%8B">Pod 启动流程</a></li>
+<li><a href="#%E5%9F%BA%E6%9C%AC%E4%BB%8B%E7%BB%8D">基本介绍</a></li>
+<li><a href="#%E5%88%9B%E5%BB%BApod">创建Pod</a></li>
+<li><a href="#%E5%88%A0%E9%99%A4pod">删除Pod</a></li>
+<li><a href="#%E6%9B%B4%E6%96%B0pod">更新Pod</a></li>
 </ul>
 </li>
 </ul>
@@ -367,7 +375,7 @@
 
                                                 <p class="copyright-item">
                                                     <span>&#x6C38;&#x4E45;&#x94FE;&#x63A5;:</span>
-                                                    <span><a href="https://blog.xwl.io/post/hhkktAeFo/">https://blog.xwl.io/post/hhkktAeFo/</a></span>
+                                                    <span><a href="https://blog.xwl.io/post/SGNGDyGh1/">https://blog.xwl.io/post/SGNGDyGh1/</a></span>
                                                 </p>
 
                                                 <p class="copyright-item">
@@ -382,9 +390,9 @@
                                                                     <span style="margin-right:15px">
                         <i class="post-share"></i>
                         <span>&#x5206;&#x4EAB;:</span>
-                                                                    <a title="QR 码" target="_blank" href="https://api.qrserver.com/v1/create-qr-code/?size=150x150&data=https://blog.xwl.io/post/hhkktAeFo/"><i class="fa fa-qrcode"></i></a>
-                                                                    <a title="QQ" target="_blank" href="https://sns.qzone.qq.com/cgi-bin/qzshare/cgi_qzshare_onekey?url=https://blog.xwl.io/post/hhkktAeFo/&sharesource=qzone&title=kubernetes基础架构&pics=https://blog.xwl.io/images/avatar.png?v=1619958604336&summary="><i class="fa fa-qq"></i></a>
-                                                                    <a title="新浪微博" target="_blank" href="https://service.weibo.com/share/share.php?url=https://blog.xwl.io/post/hhkktAeFo/&sharesource=weibo&title=kubernetes基础架构 + " - " + &pic="https://blog.xwl.io/images/avatar.png?v=1619958604336 "><i class="fa fa-weibo "></i></a>
+                                                                    <a title="QR 码" target="_blank" href="https://api.qrserver.com/v1/create-qr-code/?size=150x150&data=https://blog.xwl.io/post/SGNGDyGh1/"><i class="fa fa-qrcode"></i></a>
+                                                                    <a title="QQ" target="_blank" href="https://sns.qzone.qq.com/cgi-bin/qzshare/cgi_qzshare_onekey?url=https://blog.xwl.io/post/SGNGDyGh1/&sharesource=qzone&title=Kubernetes容器的启动/删除流程&pics=https://blog.xwl.io/images/avatar.png?v=1619958604336&summary="><i class="fa fa-qq"></i></a>
+                                                                    <a title="新浪微博" target="_blank" href="https://service.weibo.com/share/share.php?url=https://blog.xwl.io/post/SGNGDyGh1/&sharesource=weibo&title=Kubernetes容器的启动/删除流程 + " - " + &pic="https://blog.xwl.io/images/avatar.png?v=1619958604336 "><i class="fa fa-weibo "></i></a>
 
                                                                     </span>
                                                                     
@@ -414,13 +422,9 @@
                                                                                 <!---->
                                                                                 <section class="post-nav">
                                                                                     
-                                                                                        <a class="prev" rel="prev" href="https://blog.xwl.io/post/WpUHlquQY/">
-                                                                                            Kubernetes学习路径 &amp; 教程
-                                                                                        </a>
-                                                                                        
                                                                                             
-                                                                                                <a class="next" rel="next" href="https://blog.xwl.io/post/TZUaQzhYM/">
-                                                                                                    haproxy源码阅读（二）处理任务流程
+                                                                                                <a class="next" rel="next" href="https://blog.xwl.io/post/tgfaCQjnt/">
+                                                                                                    来自长假第一天的挣扎
                                                                                                 </a>
                                                                                                 
                                                                                 </section>
