@@ -215,7 +215,7 @@
                     <article class="post-wrap">
                         <header class="post-header">
                             <h1 class="post-title">
-                                关于程序员打造个人品牌
+                                软件测试快速入门指南
                             </h1>
                             
                                     <!--zh-->
@@ -226,13 +226,13 @@
                                         </a>
                                         <span class="post-time">&#x65E5;&#x671F;: <a href="#">2021-05-03</a></span>
                                         <span class="post-readtime">&#x9605;&#x8BFB;&#x65F6;&#x95F4;:<a
-                                    href="#">3.2
+                                    href="#">3.3
                                     &#x5206;&#x949F;</a></span>
-                                        <span class="post-words">&#x5B57;&#x6570;:<a href="#">950</a></span>
+                                        <span class="post-words">&#x5B57;&#x6570;:<a href="#">935</a></span>
                                         
                                             <span class="post-category">&#x5206;&#x7C7B;:
                                 
-                                <a href="https://blog.xwl.io/tag/personal-growth/">个人成长</a>
+                                <a href="https://blog.xwl.io/tag/fzu0wjIOV/">python</a>
                                 
                             </span>
                                             
@@ -244,51 +244,77 @@
                         </header>
                         
                         <div class="post-content">
-                            <p>既然你都点进来了，那么你将面临一个问题，为什么要打造个人品牌呢？</p>
-<p>我们可能需要有一个很明确的目标，才能够坚持，并持之以恒。</p>
-<p>当然对于我来说，可能就是一个知识积累的前端分享平台，它包含着我对于碎片知识的整合，用于构建自己的知识体系，完善自身庞大的知识帝国。</p>
-<p>下面我来分享一下，技术人如何打造自己的个人品牌。</p>
-<h2 id="定位">定位</h2>
-<p>决定往哪个领域发展，比如做技术博客，或者更细化一点，深耕一个领域，运维工程、Java开发等。</p>
-<p>这个定位可以从你的工作、兴趣爱好、奋斗目标等来挖掘，我就是个几乎没有爱好的技术宅，所以我不假思索的选择了工作。</p>
-<p>定位好之后，你就可以选择平台，微信公众号、博客园、CSDN、自建网站等</p>
-<p>值得注意的是，如果你也是个技术领域的人才，但请不要花费太多时间在折腾网站上，不要忘记创作的初衷。</p>
-<h2 id="专业">专业</h2>
-<p>什么才能体现你的专业呢？当然是在你定位的领域中深耕。</p>
-<p>我会把运维领域需要的技术，进行知识的体系化，比如系统、网络、监控、标准化建设等，可以用思维导图来构建你的知识图谱，细化这个领域所需要的知识、技能，然后围绕着这些节点做分享。</p>
-<p>目标很简单，就是别人在这个领域遇到问题的时候，你可以看去某某做的分享，他的博客之类。</p>
-<p>给大家分享一下，我在这个过程中踩过的坑，或者可能需要注意的几个问题。</p>
+                            <h2 id="测试的概念">测试的概念</h2>
+<p>以下只是为了让大家更快的熟悉整个测试体系，不用过度区分概念是否严谨。</p>
+<p>总体可分为<br>
+黑盒：功能测试，保证每个功能正常的使用。<br>
+白盒：结构测试（单元测试），尽可能覆盖每个逻辑，每条分支。</p>
+<p>类型</p>
 <ul>
-<li>内容要很牛逼？</li>
+<li>验证是否实现了功能（验收测试）</li>
+<li>验证是否正确实现了功能（单元测试）</li>
+<li>对产品可用性做测试，如响应时间、性能、安全等（非功能性测试）</li>
 </ul>
-<p>分享的内容不一定需要非常的牛逼，而是你分享的内容能帮助别人解决特定的问题，这就是有效的。</p>
+<p>覆盖范围</p>
 <ul>
-<li>坚持</li>
+<li>函数块的功能测试，不会启动服务（单元测试）</li>
+<li>绕开用户界面，直接对服务调用测试（服务测试/集成测试）</li>
+<li>打开用户界面进行测试（端对端测试）</li>
 </ul>
-<p>专业的人都有一个特质，那就是坚持在一个领域深耕。</p>
-<p>开始一件事非常容易，但坚持很难，持续分享，持续输出，更是难上加难。</p>
-<p>这个才是最最重要的，没有坚持，一切皆是虚妄。</p>
+<p>不用过度纠结什么TDD、敏捷、极限编程之类的，可以先了解它们的思想，到了合适的时候，你会知道你需要的是什么。</p>
+<h2 id="为什么需要测试">为什么需要测试</h2>
+<p>为了客户！为了软件质量！（你懂的）</p>
+<p>作为开发者，可能更多的面对是单元测试，其他的测试基本都是由QA负责的。也许我们是为了KPI而完成任务而奋斗，但也是为了开发完成之后，不用提心吊胆的想着它什么时候会出问题。</p>
+<p>在编写单元测试的过程中，能提前发现很多错误，看着日渐提高的测试覆盖率，就会有一种胜券在握的感觉。</p>
+<p>当然它可能会额外占用你的一些时间，但从长久来看，这仍是一个非常有价值的投资。</p>
+<p>不要为了测试而测试，即为了过度的追求覆盖率，写一些无意义的测试。</p>
+<h2 id="代码示例">代码示例</h2>
+<p>以下用python写一个简单的示例</p>
+<pre><code class="language-python">import unittest
+
+def sum(a, b):
+    return a + b
+
+class TestCount(unittest.TestCase):
+    def test_sum(self):
+        total = sum(1, 2)
+        self.assertEqual(total, 3)
+</code></pre>
+<p>我们有一个求和的方法<code>sum</code>，输入两个数字，看它是不是给我们返回预期值<code>3</code>。</p>
+<p>看起来很简单，一看就看明白的东西，写个测试是不是觉得非常多余。</p>
+<p>但是以后代码逻辑越来越复杂的时候，有个偷偷改了你的<code>sum</code>函数</p>
+<pre><code class="language-python">def sum(a, b):
+    return a - b
+</code></pre>
+<p>结果你跑测试用例的时候，发现会抛出个异常</p>
+<pre><code>self = &lt;t.TestCount testMethod=test_sum&gt;
+
+    def test_sum(self):
+        total = sum(1, 2)
+&gt;       self.assertEqual(total, 3)
+E       AssertionError: -1 != 3
+</code></pre>
+<p>你仔细一看，是不是想骂人？这还是求和的函数？一下就能抓住差点让你背锅的罪魁祸首。</p>
+<p>如果你说，干完这一票，以后就不归你负责了。那我只能劝你善良。</p>
+<h2 id="怎么学">怎么学</h2>
+<p>学习从什么时候开始都不晚，但请不要相信培训机构给你灌的毒鸡汤。</p>
+<p>作为开发者，给自己的应用程序写写测试用例，那基本非常简单，查查文档，勤快一点都能搞定。</p>
+<p>这个话题更多的面向的是专业的测试人员。</p>
+<p>当你决定要成为一名伟大的测试人员，请确定以下参数：</p>
 <ul>
-<li>独立思考</li>
+<li>有强大的自学能力</li>
 </ul>
-<p>独立思考很重要，输出知识的同时，最好也携带着自己的观点。</p>
-<p>此间最忌讳无脑复制，不加验证，说不定一个错误的文章也被复制的千百遍，会让大家怀疑你的水平。</p>
+<p>退一步说，培训机构也管不了你一辈子</p>
 <ul>
-<li>文字功底</li>
+<li>确定自己的成长路线，针对性的进行学习</li>
 </ul>
-<p>这个可能是需要技术人提高的地方，整篇文章全是代码，没有上下文，记流水账之类的，诸如此类，都会显得很low。</p>
-<p>对此，可以了解一下结构化写作相关的内容。</p>
-<h2 id="曝光">曝光</h2>
-<p>酒香也怕巷子深。</p>
-<p>当然这个观点可能也有些人不太认可，但我觉得还是有一定的道理的，除非你的酒香的出奇。</p>
-<p>假如你是做个人网站，单纯的靠搜索引擎，用户检索到你文章的可能性很小了；哪怕你在平台发布，那么平台为什么给你推广资源呢？</p>
-<p>比如我作为一个技术人，我最常用的三个曝光方法：</p>
+<p>如果你只是为了能快速找到一份工作，可以对照招聘需求进行技能拆解，朝着你的目标前进。</p>
+<p><strong>以下是我理解的测试</strong></p>
 <ul>
-<li>Github，在上面分享你的代码、作品，是最重要的背书之一。</li>
-<li>写书，当你在某个领域深耕多年，你可以整理你积累的海量知识，提取出其中精华，当然电子书也是可以的。</li>
-<li>活跃在各种技术论坛、博客，帮用户解决问题。</li>
+<li>文档类：测试计划、测试用例、测试报告、缺陷跟踪</li>
+<li>技能类：接口测试、性能测试</li>
 </ul>
-<p>目标只有一个，就是宣传自己，让别人了解你，知道你的价值。</p>
+<p>希望能对你有所帮助，如有其他问题也可以跟我交流。</p>
 
                         </div>
                         
@@ -296,9 +322,10 @@
                                 <ul class="markdownIt-TOC">
 <li>
 <ul>
-<li><a href="#%E5%AE%9A%E4%BD%8D">定位</a></li>
-<li><a href="#%E4%B8%93%E4%B8%9A">专业</a></li>
-<li><a href="#%E6%9B%9D%E5%85%89">曝光</a></li>
+<li><a href="#%E6%B5%8B%E8%AF%95%E7%9A%84%E6%A6%82%E5%BF%B5">测试的概念</a></li>
+<li><a href="#%E4%B8%BA%E4%BB%80%E4%B9%88%E9%9C%80%E8%A6%81%E6%B5%8B%E8%AF%95">为什么需要测试</a></li>
+<li><a href="#%E4%BB%A3%E7%A0%81%E7%A4%BA%E4%BE%8B">代码示例</a></li>
+<li><a href="#%E6%80%8E%E4%B9%88%E5%AD%A6">怎么学</a></li>
 </ul>
 </li>
 </ul>
@@ -316,7 +343,7 @@
 
                                                 <p class="copyright-item">
                                                     <span>&#x94FE;&#x63A5;:</span>
-                                                    <span><a href="https://blog.xwl.io/post/aD6fQ54QO/">https://blog.xwl.io/post/aD6fQ54QO/</a></span>
+                                                    <span><a href="https://blog.xwl.io/post/e5-HJIifG/">https://blog.xwl.io/post/e5-HJIifG/</a></span>
                                                 </p>
 
                                                 <p class="copyright-item">
@@ -331,9 +358,9 @@
                                                                     <span style="margin-right:15px">
                         <i class="post-share"></i>
                         <span>&#x5206;&#x4EAB;:</span>
-                                                                    <a title="QR 码" target="_blank" href="https://api.qrserver.com/v1/create-qr-code/?size=150x150&data=https://blog.xwl.io/post/aD6fQ54QO/"><i class="fa fa-qrcode"></i></a>
-                                                                    <a title="QQ" target="_blank" href="https://sns.qzone.qq.com/cgi-bin/qzshare/cgi_qzshare_onekey?url=https://blog.xwl.io/post/aD6fQ54QO/&sharesource=qzone&title=关于程序员打造个人品牌&pics=https://blog.xwl.io/images/avatar.png?v=1620033210040&summary="><i class="fa fa-qq"></i></a>
-                                                                    <a title="新浪微博" target="_blank" href="https://service.weibo.com/share/share.php?url=https://blog.xwl.io/post/aD6fQ54QO/&sharesource=weibo&title=关于程序员打造个人品牌 + " - " + &pic="https://blog.xwl.io/images/avatar.png?v=1620033210040 "><i class="fa fa-weibo "></i></a>
+                                                                    <a title="QR 码" target="_blank" href="https://api.qrserver.com/v1/create-qr-code/?size=150x150&data=https://blog.xwl.io/post/e5-HJIifG/"><i class="fa fa-qrcode"></i></a>
+                                                                    <a title="QQ" target="_blank" href="https://sns.qzone.qq.com/cgi-bin/qzshare/cgi_qzshare_onekey?url=https://blog.xwl.io/post/e5-HJIifG/&sharesource=qzone&title=软件测试快速入门指南&pics=https://blog.xwl.io/images/avatar.png?v=1620033210040&summary="><i class="fa fa-qq"></i></a>
+                                                                    <a title="新浪微博" target="_blank" href="https://service.weibo.com/share/share.php?url=https://blog.xwl.io/post/e5-HJIifG/&sharesource=weibo&title=软件测试快速入门指南 + " - " + &pic="https://blog.xwl.io/images/avatar.png?v=1620033210040 "><i class="fa fa-weibo "></i></a>
 
                                                                     </span>
                                                                     
@@ -344,8 +371,8 @@
                                                                                     <span class="tag ">
                         
                         
-                        <a href="https://blog.xwl.io/tag/personal-growth/">#
-                    个人成长
+                        <a href="https://blog.xwl.io/tag/fzu0wjIOV/">#
+                    python
                         </a>
                         
                             
@@ -363,13 +390,9 @@
                                                                                 <!---->
                                                                                 <section class="post-nav">
                                                                                     
-                                                                                        <a class="prev" rel="prev" href="https://blog.xwl.io/post/e5-HJIifG/">
-                                                                                            软件测试快速入门指南
-                                                                                        </a>
-                                                                                        
                                                                                             
-                                                                                                <a class="next" rel="next" href="https://blog.xwl.io/post/SGNGDyGh1/">
-                                                                                                    Kubernetes容器的启动/删除流程
+                                                                                                <a class="next" rel="next" href="https://blog.xwl.io/post/aD6fQ54QO/">
+                                                                                                    关于程序员打造个人品牌
                                                                                                 </a>
                                                                                                 
                                                                                 </section>
