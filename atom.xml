@@ -2,7 +2,7 @@
 <feed xmlns="http://www.w3.org/2005/Atom">
     <id>https://blog.xwl.io</id>
     <title>许大仙的博客</title>
-    <updated>2021-05-03T04:02:32.761Z</updated>
+    <updated>2021-05-03T04:35:19.369Z</updated>
     <generator>https://github.com/jpmonette/feed</generator>
     <link rel="alternate" href="https://blog.xwl.io"/>
     <link rel="self" href="https://blog.xwl.io/atom.xml"/>
@@ -859,6 +859,28 @@ make install PREFIX=/opt/haproxy
 <p>因为，它会让我们专注于自己的需求，让我们不再抱怨这样那样的不顺心，不再纠结这样那样的选择，不再羡慕别人有这样那样的东西。</p>
 <p>我们的人生就像那座冰山，海平面上会有无数狂风暴雨，但只要找到了自己的野心，我们就能在海平面底下安然无恙。</p>
 <p>所以，找到我们的野心，让它配得上我们的才华！</p>
+]]></content>
+    </entry>
+    <entry>
+        <title type="html"><![CDATA[关于本站服务构建]]></title>
+        <id>https://blog.xwl.io/post/5wRgq8uqf/</id>
+        <link href="https://blog.xwl.io/post/5wRgq8uqf/">
+        </link>
+        <updated>2021-03-31T17:20:49.000Z</updated>
+        <content type="html"><![CDATA[<h2 id="简介">简介</h2>
+<p>本站基于<a href="https://github.com/getgridea/gridea">Gridea</a>构建</p>
+<p>也曾折腾过Wordpress、Ghost、Hexo、Hugo等博客，在来回迁移的痛苦中，却没有多少文章产出。</p>
+<p>但请不要忘记初心❤️</p>
+<h2 id="gridea的同步问题">Gridea的同步问题</h2>
+<p>经常因为网络问题，出现同步失败的情况，是因为Github被墙的缘故，使用<a href="http://ping.chinaz.com">Ping工具</a>去检查一下，然后找个延迟低的IP地址，替换一下Host即可。</p>
+<h2 id="主流开源博客对比">主流开源博客对比</h2>
+<p>Wordpress：什么都有，唯一的毛病都是慢。<br>
+Ghost：生态不错，但考虑到国内的网络环境和本地化程度，只适合做英文站。<br>
+Hexo：折腾型选手，缺点是文章过多编译时太慢。<br>
+Hugo：折腾型选手，编译效率上去了，但是写文章体验不是很好。<br>
+Gridea：有独立客户端，几乎没有生态，但用起来很方便，适合专注创作的朋友。</p>
+<h2 id="总结">总结</h2>
+<p>中文博客推荐Gridea，而英文站推荐<a href="https://github.com/tryghost/ghost">Ghost</a>。</p>
 ]]></content>
     </entry>
 </feed>
