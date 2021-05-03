@@ -610,6 +610,11 @@
     line-height: 24px;
   }
 }
+.post-container .post {
+  margin: 20px;
+  padding: 20px 0 40px 0;
+  border-bottom: 1px solid #F3F3F3;
+}
 
         .en{
           display:none;
