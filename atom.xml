@@ -2,7 +2,7 @@
 <feed xmlns="http://www.w3.org/2005/Atom">
     <id>https://blog.xwl.io</id>
     <title>许大仙的博客</title>
-    <updated>2021-05-03T13:16:31.496Z</updated>
+    <updated>2021-05-04T16:50:18.673Z</updated>
     <generator>https://github.com/jpmonette/feed</generator>
     <link rel="alternate" href="https://blog.xwl.io"/>
     <link rel="self" href="https://blog.xwl.io/atom.xml"/>
@@ -10,6 +10,13 @@
     <logo>https://blog.xwl.io/images/avatar.png</logo>
     <icon>https://blog.xwl.io/favicon.ico</icon>
     <rights>All rights reserved 2021, 许大仙的博客</rights>
+    <entry>
+        <title type="html"><![CDATA[Python 2的中文编码问题]]></title>
+        <id>https://blog.xwl.io/post/Fml9VHfUQ/</id>
+        <link href="https://blog.xwl.io/post/Fml9VHfUQ/">
+        </link>
+        <updated>2021-05-04T16:27:06.000Z</updated>
+    </entry>
     <entry>
         <title type="html"><![CDATA[软件测试快速入门指南]]></title>
         <id>https://blog.xwl.io/post/e5-HJIifG/</id>

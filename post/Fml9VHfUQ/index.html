@@ -208,53 +208,196 @@
     
             <div class="main">
                 <div class="container">
-                    <div class="post-wrap archive">
-                        
+                    <article class="post-wrap">
+                        <header class="post-header">
+                            <h1 class="post-title">
+                                Python 2的中文编码问题
+                            </h1>
                             
-                                <h3>
-                                    2021
-                                </h3>
+                                    <!--zh-->
+                                    <div class="post-meta zh">
+                                        &#x4F5C;&#x8005;:
+                                        <a itemprop="author" rel="author" href="/">
+                                            许大仙
+                                        </a>
+                                        <span class="post-time">&#x65E5;&#x671F;: <a href="#">2021-05-05</a></span>
+                                        <span class="post-readtime">&#x9605;&#x8BFB;&#x65F6;&#x95F4;:<a
+                                    href="#">2.2
+                                    &#x5206;&#x949F;</a></span>
+                                        <span class="post-words">&#x5B57;&#x6570;:<a href="#">449</a></span>
+                                        
+                                            <span class="post-category">&#x5206;&#x7C7B;:
+                                
+                                <a href="https://blog.xwl.io/tag/fzu0wjIOV/">python</a>
+                                
+                            </span>
+                                                
+                                    </div>
+                                    
+                        </header>
+                        
+                        <div class="post-content">
+                            <p>环境：Windows/Python 2</p>
+<p>由于维护一些历史的<code>.net</code>项目，还运行在Windows平台上，在项目构建，甚至代码发布的过程中，需要解决一些技术债务问题。</p>
+<p><strong>Jinkens</strong></p>
+<p>我们采用的Windows下的Jenkins编译.net framework项目，在此过程中，该项目存在多个中文的文件名称，由于该项目有十几年历史，结构复杂不便改动，于是只能想法办兼容一下。</p>
+<p>使用git获取差异文件列表</p>
+<pre><code class="language-shell">git diff --no-renames --name-only $commit_id_1 $commit_id_2
+</code></pre>
+<p>对比历史差异文件的时候，需提前执行以下命令，否则会造成中文乱码</p>
+<pre><code class="language-shell">git config --global core.quotepath false
+</code></pre>
+<p>然后我们在python脚本中处理文件名编码格式，由于是Windows平台，所以采用gbk编码。</p>
+<pre><code class="language-python">filename.decode(&quot;utf-8&quot;).encode(&quot;gbk&quot;)
+</code></pre>
+<p><strong>Python</strong></p>
+<p>此外在python中使用<code>zipfile</code>模块进行压缩文件处理的时候，也要注意中文乱码问题</p>
+<pre><code class="language-python">import zipfile
+
+zf = InMemoryZip('code.zip')
+p = InMemoryZip()
+for name in zf.get_namelist():
+    try:
+        n = name.encode('cp437').decode('gbk')
+    except:
+        n = name.encode('utf-8').decode('utf-8')
+  
+    p.append(n, zf.open(name))
+</code></pre>
+<p>在内存中操作ZIP压缩文件（附注代码）</p>
+<pre><code class="language-python">import os
+import io
+import zipfile
+
+class InMemoryZip(object):
+    def __init__(self, buffer=None):
+        # Create the in-memory file-like object
+        self.in_memory_zip = io.BytesIO(buffer)
+        if buffer:
+            self.zf = zipfile.ZipFile(self.in_memory_zip, &quot;r&quot;)
+        else:
+            self.zf = zipfile.ZipFile(self.in_memory_zip, &quot;a&quot;, zipfile.ZIP_DEFLATED, False)
+
+    def append(self, filename, file_contents):
+        # Write the file to the in-memory zip
+        # zf.writestr(filename_in_zip, file_contents)
+        self.zf.writestr(filename, file_contents)
+
+        # Mark the files as having been created on Windows so that
+        # Unix permissions are not inferred as 0000
+        for zfile in self.zf.filelist:
+            zfile.create_system = 0
+        return self
+    
+    def read_file(self, name):
+        return self.zf.open(name).read()
+
+    def extractall(self, directory):
+        self.zf.extractall(directory)
+
+    def get_namelist(self):
+        return self.zf.namelist()
+
+    def read(self):
+        &quot;&quot;&quot;Returns a string with the contents of the in-memory zip.&quot;&quot;&quot;
+        self.zf.close()
+        self.in_memory_zip.seek(0)
+        return self.in_memory_zip.read()
+</code></pre>
+
+                        </div>
+                        
+                            <div class="post-toc">
+                                
+                            </div>
+                            
                                 
                                     
+                                            <!--zh-->
+                                            <section class="post-copyright zh">
+                                                <p class="copyright-item ">
+                                                    <span>&#x4F5C;&#x8005;:</span>
+                                                    <span>许大仙</span>
+                                                </p>
 
-                                        <article class="archive-item">
-                                            <a class="archive-item-link" href="https://blog.xwl.io/post/TZUaQzhYM/">
-                                                haproxy源码阅读（二）处理任务流程
-                                            </a>
-                                            <span class="archive-item-date">2021-04-16 </span>
-                                        </article>
-                                        
-                                            
-                                    
+                                                <p class="copyright-item">
+                                                    <span>&#x94FE;&#x63A5;:</span>
+                                                    <span><a href="https://blog.xwl.io/post/Fml9VHfUQ/">https://blog.xwl.io/post/Fml9VHfUQ/</a></span>
+                                                </p>
 
-                                        <article class="archive-item">
-                                            <a class="archive-item-link" href="https://blog.xwl.io/post/s5EVafZW4/">
-                                                haproxy源码阅读（一）主循环流程
-                                            </a>
-                                            <span class="archive-item-date">2021-04-15 </span>
-                                        </article>
-                                        
-                                            
-                                    
-
-                                        <article class="archive-item">
-                                            <a class="archive-item-link" href="https://blog.xwl.io/post/tS0UUUJy6/">
-                                                使用vscode调试haproxy
-                                            </a>
-                                            <span class="archive-item-date">2021-04-15 </span>
-                                        </article>
-                                        
+                                                <p class="copyright-item">
+                                                    <span>&#x534F;&#x8BAE;:</span>
+                                                    <span><a href="https://creativecommons.org/licenses/by-sa/4.0/">CC BY-SA 4.0</a></span>
+                                                </p>
+                                            </section>
                                             
                                                 
-                    </div>
-                    <div class="pagination-container">
+                                                    
+                                                                    <!--Share-->
+                                                                    <span style="margin-right:15px">
+                        <i class="post-share"></i>
+                        <span>&#x5206;&#x4EAB;:</span>
+                                                                    <a title="QR 码" target="_blank" href="https://api.qrserver.com/v1/create-qr-code/?size=150x150&data=https://blog.xwl.io/post/Fml9VHfUQ/"><i class="fa fa-qrcode"></i></a>
+                                                                    <a title="QQ" target="_blank" href="https://sns.qzone.qq.com/cgi-bin/qzshare/cgi_qzshare_onekey?url=https://blog.xwl.io/post/Fml9VHfUQ/&sharesource=qzone&title=Python 2的中文编码问题&pics=https://blog.xwl.io/images/avatar.png?v=1620146988101&summary="><i class="fa fa-qq"></i></a>
+                                                                    <a title="新浪微博" target="_blank" href="https://service.weibo.com/share/share.php?url=https://blog.xwl.io/post/Fml9VHfUQ/&sharesource=weibo&title=Python 2的中文编码问题 + " - " + &pic="https://blog.xwl.io/images/avatar.png?v=1620146988101 "><i class="fa fa-weibo "></i></a>
+
+                                                                    </span>
+                                                                    
+                                                                            <!--zh-->
+                                                                            <section class="post-tags zh ">
+                                                                                <div>
+                                                                                    <span>&#x6807;&#x7B7E;:</span>
+                                                                                    <span class="tag ">
+                        
+                        
+                        <a href="https://blog.xwl.io/tag/fzu0wjIOV/">#
+                    python
+                        </a>
                         
                             
-                                    
-                                            
-                    </div>
+                                </span>
+                                                                                </div>
+                                                                                <div>
+                                                                                    <a href="javascript:window.history.back();">
+                        &#x8FD4;&#x56DE;</a>
+                                                                                    <span>&dot;</span>
+                                                                                    <a href="#">&#x4E3B;&#x9875;</a>
+                                                                                </div>
+                                                                            </section>
+
+                                                                            
+                                                                                <!---->
+                                                                                <section class="post-nav">
+                                                                                    
+                                                                                            
+                                                                                                <a class="next" rel="next" href="https://blog.xwl.io/post/e5-HJIifG/">
+                                                                                                    软件测试快速入门指南
+                                                                                                </a>
+                                                                                                
+                                                                                </section>
+                                                                                
+                                                                                <br><script type="application/javascript" src="//unpkg.com/valine@latest/dist/Valine.min.js"></script>
+<div id="vlaine-comment"></div>
+<script type="application/javascript">
+    new Valine({
+        el: '#vlaine-comment',
+        appId: 'BSG06sWbHRwEElng5cXBc98v-MdYXbMMI',
+        appKey: 'Chxyat5TwxYpmX1H4rzTd6E2',
+        pageSize: 10,
+        avatar: 'robohash',
+        placeholder: '来都来了，不妨评论一下',
+        visitor: false,
+        highlight: true,
+        recordIP: false,
+    })
+</script>
+                                                                                        
+                    </article>
                 </div>
+                
             </div>
+    </div>
+    </div>
     </div>
     
         <footer id="footer" class="footer">
@@ -299,5 +442,8 @@
                 </script>
         </div>
 </body>
+<script>
+    scroll();
+</script>
 
 </html>
