@@ -221,7 +221,7 @@
                     <article class="post-wrap">
                         <header class="post-header">
                             <h1 class="post-title">
-                                关于本站服务构建
+                                关于GitLab CI常用策略
                             </h1>
                             
                                     <!--zh-->
@@ -230,15 +230,19 @@
                                         <a itemprop="author" rel="author" href="/">
                                             许大仙
                                         </a>
-                                        <span class="post-time">&#x65E5;&#x671F;: <a href="#">2021-04-01</a></span>
+                                        <span class="post-time">&#x65E5;&#x671F;: <a href="#">2021-05-07</a></span>
                                         <span class="post-readtime">&#x9605;&#x8BFB;&#x65F6;&#x95F4;:<a
-                                    href="#">1.0
+                                    href="#">3.3
                                     &#x5206;&#x949F;</a></span>
-                                        <span class="post-words">&#x5B57;&#x6570;:<a href="#">286</a></span>
+                                        <span class="post-words">&#x5B57;&#x6570;:<a href="#">869</a></span>
                                         
                                             <span class="post-category">&#x5206;&#x7C7B;:
                                 
-                                <a href="https://blog.xwl.io/tag/undefined/">未归档</a>
+                                <a href="https://blog.xwl.io/tag/gitlab/">gitlab</a>
+                                
+                                <a href="https://blog.xwl.io/tag/ci/">ci</a>
+                                
+                                <a href="https://blog.xwl.io/tag/python/">python</a>
                                 
                             </span>
                                                 
@@ -247,30 +251,92 @@
                         </header>
                         
                         <div class="post-content">
-                            <h2 id="简介">简介</h2>
-<p>本站基于<a href="https://github.com/getgridea/gridea">Gridea</a>构建</p>
-<p>也曾折腾过Wordpress、Ghost、Hexo、Hugo等博客，在来回迁移的痛苦中，却没有多少文章产出。</p>
-<p>但请不要忘记初心❤️</p>
-<h2 id="主流开源博客对比">主流开源博客对比</h2>
-<p>Wordpress：什么都有，唯一的毛病都是慢。<br>
-Ghost：生态不错，但考虑到国内的网络环境和本地化程度，只适合做英文站。<br>
-Hexo：折腾型选手，缺点是文章过多编译时太慢。<br>
-Hugo：折腾型选手，编译效率上去了，但是写文章体验不是很好。<br>
-Gridea：有独立客户端，几乎没有生态，但用起来很方便，适合专注创作的朋友。</p>
-<h2 id="gridea的同步问题">Gridea的同步问题</h2>
-<p>经常因为网络问题，出现同步失败的情况，是因为GitHub被墙的缘故，使用<a href="http://ping.chinaz.com">Ping工具</a>去检查一下，然后找个延迟低的IP地址，替换一下Host即可。</p>
-<h2 id="本站构建使用的模块">本站构建使用的模块</h2>
-<p>以下是我现在使用的一些组件，给大家省点时间。</p>
-<p>网站部署<br>
-<a href="https://pages.github.com">GitHub Page</a> + <a href="https://www.cloudflare.com/zh-cn/">Cloudflare</a></p>
-<p>客户端<br>
-<a href="https://gridea.dev">Gridea</a></p>
-<p>模版<br>
-<a href="https://github.com/ITJoker233/Gridea-theme-Chic">Gridea-theme-Chic</a></p>
-<p>评论系统<br>
-<a href="https://valine.js.org">Valine</a> + <a href="https://leancloud.app">Leancloud</a></p>
-<p>邮件订阅入口<br>
-<a href="http://tinyletter.com">Tinyletter</a></p>
+                            <p>正好今晚处理了博客的SEO问题，配置了一下GitHub Action，就顺便回顾一下GitLab CI常用的策略吧。</p>
+<h2 id="背景">背景</h2>
+<p>GitHub是一款非常优秀的产品，但企业还是更倾向于在内部自建仓库，所以在运维流程上，还是接触的GitLab稍多一些。</p>
+<p>我刚来的时候公司运维环节比较薄弱，所以还是沿用之前的GitLab CI/CD流程，故学习了一阵，如果你们还没有完善的CI/CD流程，建议使用Jenkins。</p>
+<h2 id="简介">简介</h2>
+<p>在GitLab CI上常用的动作</p>
+<ul>
+<li>单元测试，跑完之后会有个测试覆盖率，部分企业会作为发布的硬性标准。</li>
+<li>质量评估，可能会运行语法检测，或者集成一些第三方的代码质量管理平台，例如<code>Sonar</code></li>
+<li>打包容器，现在是云原生时代，建议使用，更多的应该关注业务本身，不应该过多的把时间花在重复配置环境上。</li>
+</ul>
+<p>至于部署？</p>
+<p>实际生产上，从来都不会把部署的工作放到GitLab上做，不可控因素太多了。</p>
+<p>除非就几个人的创业公司，为了省事，可以这样做。</p>
+<p>言归正传，我们先看下完整的构建配置<code>.gitlab-ci.yml</code></p>
+<pre><code class="language-yaml">stages:
+  - unitest
+  - qa
+  - build
+
+variables:
+  Name: example
+
+before_script:
+  - echo &quot;run script&quot;
+
+job-unitest:
+    stage: unitest
+
+job-qa:
+    stage: qa
+
+job-build:
+    stage: build
+</code></pre>
+<p>相比乱七八糟的教程，常用的就这么几种</p>
+<ul>
+<li>stages，定义这个构建有几个流程，会按顺序执行下去，分别对应的job的<code>stage</code>字段</li>
+<li>variables，定义环境变量，在之后的流程中可以引用它。</li>
+<li>before_script，流程开始前，执行的准备工作，可以完成一些配置性的工作。</li>
+<li>job-xxx，这个名字是可以随意定义的，只要<code>stage</code>字段匹配即可。</li>
+</ul>
+<h2 id="单元测试流程">单元测试流程</h2>
+<p>也就是我们介绍的<code>stage: unitest</code>阶段，名称为<code>job-unitest</code>，可以随意定义。</p>
+<p>拿Python举例，常用的方案会使用<code>pytest</code>进行单元测试工作，同时生成一个测试报告。</p>
+<pre><code class="language-yaml">job-unitest:
+    stage: unitest
+    tags:
+      - docker
+    image: python:3
+	script:
+    	- pytest --junit-xml=report.xml
+</code></pre>
+<p>额外介绍一些<code>tags</code>，它的可选项一般为<code>shell</code>和<code>docker</code>作为它的Runner，建议使用后者，需要在编译Runner的时候集成<code>docker</code>。</p>
+<p>shell模式的问题：会直接用Runner宿主机的shell命令，在多Runner环境下，要保证每台机器都要配置依赖环境，非常麻烦。 同时在以后的Runner升级工作中，可能会有未知的风险。</p>
+<p>另外一种场景是，应用可能依赖数据库，那么配置就会变成这样。</p>
+<pre><code class="language-yaml">job-unitest:
+    stage: unitest
+    tags:
+      - docker
+    image: python:3
+    services:
+      - mysql:5.7
+	script:
+    	- pytest --junit-xml=report.xml
+</code></pre>
+<p>使用数据库的官方文档 <a href="https://docs.gitlab.com/ee/ci/services/mysql.html">GitLab CI MySQL</a></p>
+<p>需要注意的是，MySQL的User字段可能为root，官方文档显示的是runner，注意对应版本。</p>
+<p>友情提示：不会真有人忘记创建DB吧？</p>
+<h2 id="容器打包流程">容器打包流程</h2>
+<p>这个阶段没什么好说的，无外乎使用Dockerfile，进行build、push工作，直接给个范例。</p>
+<pre><code class="language-yaml">job-bulid:
+    stage: build
+    tags:
+      - docker
+    services:
+    	- docker:dind
+    image: docker:latest
+    script:
+      - docker build -t ${Name}:1.0 .
+      - docker push
+</code></pre>
+<p>这里唯一要注意的，只有<code>docker:dind</code>这个服务，它是必须要存在的，否则会报错。</p>
+<p>还记得之前我们定义过一个变量，这里就用上了。</p>
+<p>push的命令我没有补全，自行查找文档。</p>
+<p>睡了 狗命要紧。</p>
 
                         </div>
                         
@@ -278,10 +344,10 @@ Gridea：有独立客户端，几乎没有生态，但用起来很方便，适�
                                 <ul class="markdownIt-TOC">
 <li>
 <ul>
+<li><a href="#%E8%83%8C%E6%99%AF">背景</a></li>
 <li><a href="#%E7%AE%80%E4%BB%8B">简介</a></li>
-<li><a href="#%E4%B8%BB%E6%B5%81%E5%BC%80%E6%BA%90%E5%8D%9A%E5%AE%A2%E5%AF%B9%E6%AF%94">主流开源博客对比</a></li>
-<li><a href="#gridea%E7%9A%84%E5%90%8C%E6%AD%A5%E9%97%AE%E9%A2%98">Gridea的同步问题</a></li>
-<li><a href="#%E6%9C%AC%E7%AB%99%E6%9E%84%E5%BB%BA%E4%BD%BF%E7%94%A8%E7%9A%84%E6%A8%A1%E5%9D%97">本站构建使用的模块</a></li>
+<li><a href="#%E5%8D%95%E5%85%83%E6%B5%8B%E8%AF%95%E6%B5%81%E7%A8%8B">单元测试流程</a></li>
+<li><a href="#%E5%AE%B9%E5%99%A8%E6%89%93%E5%8C%85%E6%B5%81%E7%A8%8B">容器打包流程</a></li>
 </ul>
 </li>
 </ul>
@@ -299,7 +365,7 @@ Gridea：有独立客户端，几乎没有生态，但用起来很方便，适�
 
                                                 <p class="copyright-item">
                                                     <span>&#x94FE;&#x63A5;:</span>
-                                                    <span><a href="https://blog.xwl.io/post/5wRgq8uqf/">https://blog.xwl.io/post/5wRgq8uqf/</a></span>
+                                                    <span><a href="https://blog.xwl.io/post/okYjMtPcs/">https://blog.xwl.io/post/okYjMtPcs/</a></span>
                                                 </p>
 
                                                 <p class="copyright-item">
@@ -314,9 +380,9 @@ Gridea：有独立客户端，几乎没有生态，但用起来很方便，适�
                                                                     <span style="margin-right:15px">
                         <i class="post-share"></i>
                         <span>&#x5206;&#x4EAB;:</span>
-                                                                    <a title="QR 码" target="_blank" href="https://api.qrserver.com/v1/create-qr-code/?size=150x150&data=https://blog.xwl.io/post/5wRgq8uqf/"><i class="fa fa-qrcode"></i></a>
-                                                                    <a title="QQ" target="_blank" href="https://sns.qzone.qq.com/cgi-bin/qzshare/cgi_qzshare_onekey?url=https://blog.xwl.io/post/5wRgq8uqf/&sharesource=qzone&title=关于本站服务构建&pics=https://blog.xwl.io/images/avatar.png?v=1620323123251&summary="><i class="fa fa-qq"></i></a>
-                                                                    <a title="新浪微博" target="_blank" href="https://service.weibo.com/share/share.php?url=https://blog.xwl.io/post/5wRgq8uqf/&sharesource=weibo&title=关于本站服务构建 + " - " + &pic="https://blog.xwl.io/images/avatar.png?v=1620323123251 "><i class="fa fa-weibo "></i></a>
+                                                                    <a title="QR 码" target="_blank" href="https://api.qrserver.com/v1/create-qr-code/?size=150x150&data=https://blog.xwl.io/post/okYjMtPcs/"><i class="fa fa-qrcode"></i></a>
+                                                                    <a title="QQ" target="_blank" href="https://sns.qzone.qq.com/cgi-bin/qzshare/cgi_qzshare_onekey?url=https://blog.xwl.io/post/okYjMtPcs/&sharesource=qzone&title=关于GitLab CI常用策略&pics=https://blog.xwl.io/images/avatar.png?v=1620323123251&summary="><i class="fa fa-qq"></i></a>
+                                                                    <a title="新浪微博" target="_blank" href="https://service.weibo.com/share/share.php?url=https://blog.xwl.io/post/okYjMtPcs/&sharesource=weibo&title=关于GitLab CI常用策略 + " - " + &pic="https://blog.xwl.io/images/avatar.png?v=1620323123251 "><i class="fa fa-weibo "></i></a>
 
                                                                     </span>
                                                                     
@@ -327,8 +393,16 @@ Gridea：有独立客户端，几乎没有生态，但用起来很方便，适�
                                                                                     <span class="tag ">
                         
                         
-                        <a href="https://blog.xwl.io/tag/undefined/">#
-                    未归档
+                        <a href="https://blog.xwl.io/tag/gitlab/">#
+                    gitlab
+                        </a>
+                        
+                        <a href="https://blog.xwl.io/tag/ci/">#
+                    ci
+                        </a>
+                        
+                        <a href="https://blog.xwl.io/tag/python/">#
+                    python
                         </a>
                         
                             
@@ -346,11 +420,11 @@ Gridea：有独立客户端，几乎没有生态，但用起来很方便，适�
                                                                                 <!---->
                                                                                 <section class="post-nav">
                                                                                     
-                                                                                        <a class="prev" rel="prev" href="https://blog.xwl.io/post/sMLLztYXw/">
-                                                                                            别让我们的野心配不上才华｜圈圈@TEDx
-                                                                                        </a>
-                                                                                        
                                                                                             
+                                                                                                <a class="next" rel="next" href="https://blog.xwl.io/post/Fml9VHfUQ/">
+                                                                                                    Python 2的中文编码问题
+                                                                                                </a>
+                                                                                                
                                                                                 </section>
                                                                                 
                                                                                 <br><script type="application/javascript" src="//unpkg.com/valine@latest/dist/Valine.min.js"></script>
