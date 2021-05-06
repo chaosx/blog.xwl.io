@@ -28,4 +28,4 @@ jobs:
       - name: update google
         uses: wei/curl@master
         with:
-          args: https://httpbin.org/get
+          args: https://www.google.com/ping?sitemap=https://blog.xwl.io/atom.xml
