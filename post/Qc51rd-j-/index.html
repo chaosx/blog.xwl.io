@@ -4,7 +4,7 @@
 <head>
     <meta charset="utf-8" />
 <title>
-    许大仙的博客
+    使用GitHub Action自动提交网站收录 | 许大仙的博客
 </title>
 <!--[if lt IE 9]><script src="//cdn.bootcss.com/html5shiv/r29/html5.js"></script><![endif]-->
 <meta content="width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=0" name="viewport" />
@@ -218,53 +218,216 @@
     
             <div class="main">
                 <div class="container">
-                    <div class="post-wrap archive">
-                        
+                    <article class="post-wrap">
+                        <header class="post-header">
+                            <h1 class="post-title">
+                                使用GitHub Action自动提交网站收录
+                            </h1>
                             
-                                <h3>
-                                    2021
-                                </h3>
+                                    <!--zh-->
+                                    <div class="post-meta zh">
+                                        &#x4F5C;&#x8005;:
+                                        <a itemprop="author" rel="author" href="/">
+                                            许大仙
+                                        </a>
+                                        <span class="post-time">&#x65E5;&#x671F;: <a href="#">2021-05-09</a></span>
+                                        <span class="post-readtime">&#x9605;&#x8BFB;&#x65F6;&#x95F4;:<a
+                                    href="#">3.9
+                                    &#x5206;&#x949F;</a></span>
+                                        <span class="post-words">&#x5B57;&#x6570;:<a href="#">836</a></span>
+                                        
+                                            <span class="post-category">&#x5206;&#x7C7B;:
+                                
+                                <a href="https://blog.xwl.io/tag/github/">github</a>
+                                
+                            </span>
+                                                
+                                    </div>
+                                    
+                        </header>
+                        
+                        <div class="post-content">
+                            <p>都2021年了，个人博客都成为小众产品了，几乎都是开发者，十有八九还是个前端开发。</p>
+<p>虽然GitHub时常被墙，但大部分人还是会选择GitHub Pages，以减少服务器的维护成本。</p>
+<p>而作为个人博客站长，几乎都会不务正业的折腾各种功能模块，今天就来介绍SEO相关，关于网站收录的部分。</p>
+<p>常用的搜索引擎一般分为以下三种：</p>
+<ul>
+<li>百度</li>
+<li>Google</li>
+<li>Bing</li>
+</ul>
+<p>百度作为检索信息最多，且最乱的典型代表，你常常会在第一页找不到你想要的结果，但无奈它是我国最常用的搜索引擎。</p>
+<p>百度之前有个自动提交的JS，据我所知目前已经作废了，但接口还会正常返回。</p>
+<p>常规的提交方法是去百度站长平台提交Sitemap，文件名一般为<code>sitemap.xml</code>，由于我目前使用的Gridea，没有生成Sitemap的方法，于是乎决定采用API的方式提交。</p>
+<p>我们先准备好推送网站收录的脚本，以下是我写好的<code>.push.py</code></p>
+<pre><code class="language-python">import re
+import json
+import requests
+
+domain = &quot;blog.xwl.io&quot;
+token = &quot;xxxxxxxxxxx&quot;
+
+res = requests.get(&quot;https://%s/archives/&quot; % domain)
+
+tags = re.findall(r'href=&quot;([a-zA-z]+://[^\s]*)&quot;', str(res.text))
+
+urls = []
+for t in tags:
+    if t.endswith(&quot;css&quot;) or t.endswith(&quot;js&quot;):continue
+    if not t.startswith(&quot;https://blog.xwl.io&quot;):continue
+    urls.append(t)
+
+urls = &quot;\n&quot;.join(urls)
+
+headers = {&quot;Content-Type&quot;: &quot;text/plain&quot;}
+resp = requests.post(&quot;http://data.zz.baidu.com/urls?site=https://%s&amp;token=%s&quot; &amp; (domain, token), headers=headers, data=urls)
+print(resp.text)
+</code></pre>
+<p>脚本中的token在百度站长平台内的普通收录里获取。</p>
+<p>该脚本的功能是抓取网页上的所有链接，目标页面一般是首页，或者归档页，然后通过百度提供的API进行提交。</p>
+<p>然后我们进入到Github的博客项目中，选择Action，创建一个Workflow，会生成一个基础的模版，然后直接在<code>steps</code>路径下执行自己的脚本。</p>
+<pre><code class="language-yaml"># This is a basic workflow to help you get started with Actions
+
+name: CI
+
+# Controls when the action will run. 
+on:
+  # Triggers the workflow on push or pull request events but only for the main branch
+  push:
+    branches: [ main ]
+  pull_request:
+    branches: [ main ]
+
+  # Allows you to run this workflow manually from the Actions tab
+  workflow_dispatch:
+
+# A workflow run is made up of one or more jobs that can run sequentially or in parallel
+jobs:
+  # This workflow contains a single job called &quot;build&quot;
+  build:
+    # The type of runner that the job will run on
+    runs-on: ubuntu-latest
+
+    # Steps represent a sequence of tasks that will be executed as part of the job
+    steps:
+      # Checks-out your repository under $GITHUB_WORKSPACE, so your job can access it
+      - uses: actions/checkout@v2
+         
+      - name: update baidu
+        uses: actions/setup-python@v2
+        with:
+          python-version: '3.x' # Version range or exact version of a Python version to use, using SemVer's version range syntax
+          architecture: 'x64' # optional x64 or x86. Defaults to x64 if not specified
+      - run: pip install requests &amp;&amp; python .push.py
+</code></pre>
+<p>以上是我使用的完整的workflow配置，再添加上Google和Bing的部分，就大功告成了。</p>
+<p>Google和Bing的Sitemap提交就非常的简单，直接通过一个GET请求即可。</p>
+<p>在配置中的<code>steps</code>字段下继续增加即可。</p>
+<pre><code class="language-yaml">- name: update google
+  uses: wei/curl@master
+  with:
+    args: https://www.google.com/ping?sitemap=https://blog.xwl.io/atom.xml
+
+- name: update bing
+  uses: wei/curl@master
+  with:
+    args: http://www.bing.com/webmaster/ping.aspx?sitemap=https://blog.xwl.io/atom.xml
+</code></pre>
+<p>把自己的小站弄的花里胡哨，除了知识的分享，也是希望更多的人能看到。</p>
+
+                        </div>
+                        
+                            <div class="post-toc">
+                                
+                            </div>
+                            
                                 
                                     
+                                            <!--zh-->
+                                            <section class="post-copyright zh">
+                                                <p class="copyright-item ">
+                                                    <span>&#x4F5C;&#x8005;:</span>
+                                                    <span>许大仙</span>
+                                                </p>
 
-                                        <article class="archive-item">
-                                            <a class="archive-item-link" href="https://blog.xwl.io/post/okYjMtPcs/">
-                                                关于GitLab CI常用策略
-                                            </a>
-                                            <span class="archive-item-date">2021-05-07 </span>
-                                        </article>
-                                        
-                                            
-                                    
+                                                <p class="copyright-item">
+                                                    <span>&#x94FE;&#x63A5;:</span>
+                                                    <span><a href="https://blog.xwl.io/post/Qc51rd-j-/">https://blog.xwl.io/post/Qc51rd-j-/</a></span>
+                                                </p>
 
-                                        <article class="archive-item">
-                                            <a class="archive-item-link" href="https://blog.xwl.io/post/Fml9VHfUQ/">
-                                                Python 2的中文编码问题
-                                            </a>
-                                            <span class="archive-item-date">2021-05-05 </span>
-                                        </article>
-                                        
-                                            
-                                    
-
-                                        <article class="archive-item">
-                                            <a class="archive-item-link" href="https://blog.xwl.io/post/e5-HJIifG/">
-                                                软件测试快速入门指南
-                                            </a>
-                                            <span class="archive-item-date">2021-05-03 </span>
-                                        </article>
-                                        
+                                                <p class="copyright-item">
+                                                    <span>&#x534F;&#x8BAE;:</span>
+                                                    <span><a href="https://creativecommons.org/licenses/by-sa/4.0/">CC BY-SA 4.0</a></span>
+                                                </p>
+                                            </section>
                                             
                                                 
-                    </div>
-                    <div class="pagination-container">
+                                                    
+                                                                    <!--Share-->
+                                                                    <span style="margin-right:15px">
+                        <i class="post-share"></i>
+                        <span>&#x5206;&#x4EAB;:</span>
+                                                                    <a title="QR 码" target="_blank" href="https://api.qrserver.com/v1/create-qr-code/?size=150x150&data=https://blog.xwl.io/post/Qc51rd-j-/"><i class="fa fa-qrcode"></i></a>
+                                                                    <a title="QQ" target="_blank" href="https://sns.qzone.qq.com/cgi-bin/qzshare/cgi_qzshare_onekey?url=https://blog.xwl.io/post/Qc51rd-j-/&sharesource=qzone&title=使用GitHub Action自动提交网站收录&pics=https://blog.xwl.io/images/avatar.png?v=1620498305029&summary="><i class="fa fa-qq"></i></a>
+                                                                    <a title="新浪微博" target="_blank" href="https://service.weibo.com/share/share.php?url=https://blog.xwl.io/post/Qc51rd-j-/&sharesource=weibo&title=使用GitHub Action自动提交网站收录 + " - " + &pic="https://blog.xwl.io/images/avatar.png?v=1620498305029 "><i class="fa fa-weibo "></i></a>
+
+                                                                    </span>
+                                                                    
+                                                                            <!--zh-->
+                                                                            <section class="post-tags zh ">
+                                                                                <div>
+                                                                                    <span>&#x6807;&#x7B7E;:</span>
+                                                                                    <span class="tag ">
+                        
+                        
+                        <a href="https://blog.xwl.io/tag/github/">#
+                    github
+                        </a>
                         
                             
-                                    
-                                            
-                    </div>
+                                </span>
+                                                                                </div>
+                                                                                <div>
+                                                                                    <a href="javascript:window.history.back();">
+                        &#x8FD4;&#x56DE;</a>
+                                                                                    <span>&dot;</span>
+                                                                                    <a href="#">&#x4E3B;&#x9875;</a>
+                                                                                </div>
+                                                                            </section>
+
+                                                                            
+                                                                                <!---->
+                                                                                <section class="post-nav">
+                                                                                    
+                                                                                            
+                                                                                                <a class="next" rel="next" href="https://blog.xwl.io/post/okYjMtPcs/">
+                                                                                                    关于GitLab CI常用策略
+                                                                                                </a>
+                                                                                                
+                                                                                </section>
+                                                                                
+                                                                                    <script type="application/javascript" src="//unpkg.com/valine@latest/dist/Valine.min.js"></script>
+<div id="vlaine-comment" style="margin-top: 55px;"></div>
+<script type="application/javascript">
+    new Valine({
+        el: '#vlaine-comment',
+        appId: 'BSG06sWbHRwEElng5cXBc98v-MdYXbMMI',
+        appKey: 'Chxyat5TwxYpmX1H4rzTd6E2',
+        pageSize: 10,
+        avatar: 'robohash',
+        placeholder: '来都来了，不妨评论一下',
+        visitor: false,
+        highlight: true,
+        recordIP: false,
+    })
+</script>
+                                                                                
+                    </article>
                 </div>
+                
             </div>
+    </div>
+    </div>
     </div>
     
         <footer id="footer" class="footer">
@@ -309,5 +472,8 @@
                 </script>
         </div>
 </body>
+<script>
+    scroll();
+</script>
 
 </html>
