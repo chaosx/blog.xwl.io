@@ -34,3 +34,9 @@ jobs:
         uses: wei/curl@master
         with:
           args: http://www.bing.com/webmaster/ping.aspx?sitemap=https://blog.xwl.io/atom.xml
+          
+      - uses: actions/setup-python@v2
+        with:
+          python-version: '3.x' # Version range or exact version of a Python version to use, using SemVer's version range syntax
+          architecture: 'x64' # optional x64 or x86. Defaults to x64 if not specified
+      - run: pip install requests && python .push.py
