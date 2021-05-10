@@ -4,7 +4,7 @@
 <head>
     <meta charset="utf-8" />
 <title>
-    Kubernetes学习路径 &amp; 教程 | 许大仙的博客
+    Python 证书管理 | 许大仙的博客
 </title>
 <!--[if lt IE 9]><script src="//cdn.bootcss.com/html5shiv/r29/html5.js"></script><![endif]-->
 <meta content="width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=0" name="viewport" />
@@ -221,7 +221,7 @@
                     <article class="post-wrap">
                         <header class="post-header">
                             <h1 class="post-title">
-                                Kubernetes学习路径 &amp; 教程
+                                Python 证书管理
                             </h1>
                             
                                     <!--zh-->
@@ -230,15 +230,15 @@
                                         <a itemprop="author" rel="author" href="/">
                                             许大仙
                                         </a>
-                                        <span class="post-time">&#x65E5;&#x671F;: <a href="#">2021-04-24</a></span>
+                                        <span class="post-time">&#x65E5;&#x671F;: <a href="#">2021-05-11</a></span>
                                         <span class="post-readtime">&#x9605;&#x8BFB;&#x65F6;&#x95F4;:<a
-                                    href="#">0.6
+                                    href="#">2.5
                                     &#x5206;&#x949F;</a></span>
-                                        <span class="post-words">&#x5B57;&#x6570;:<a href="#">178</a></span>
+                                        <span class="post-words">&#x5B57;&#x6570;:<a href="#">528</a></span>
                                         
                                             <span class="post-category">&#x5206;&#x7C7B;:
                                 
-                                <a href="https://blog.xwl.io/tag/kubernetes/">kubernetes</a>
+                                <a href="https://blog.xwl.io/tag/python/">python</a>
                                 
                             </span>
                                                 
@@ -247,37 +247,83 @@
                         </header>
                         
                         <div class="post-content">
-                            <p>本文学习路径抄录了该项目大量文字 <a href="https://github.com/caicloud/kube-ladder">kube-ladder</a>，相关知识会慢慢补齐。</p>
-<h2 id="入门篇">入门篇</h2>
-<ul>
-<li>Kubernetes 的背景和优势</li>
-<li>Kubernetes 环境的安装部署</li>
-<li>Kubernetes 常用资源的使用方法</li>
-</ul>
-<p>包括不限于Node、Pod、Service、Deployment、Namespace、ConfigMap、Secret。</p>
-<h2 id="原理篇">原理篇</h2>
-<p>目标是了解Kubernetes的架构的核心组成部分，及其工作原理，容器从启动到结束整个生命周期的过程。</p>
-<ul>
-<li><a href="/post/hhkktAeFo/">Kubernetes 的基础架构</a></li>
-<li><a href="/post/SGNGDyGh1/">Kubernetes 容器调度的基本流程</a></li>
-</ul>
-<p>运维人员基本做到这一步就可以了，下面的内容将会涉及到开发。</p>
-<h2 id="集成篇">集成篇</h2>
-<p>本节的目标是使用apiserver相关的接口，用于外部的服务集成。</p>
+                            <p>在开发运维平台的时候，都有绕不过的一个需求，那就是对网站证书的管理。</p>
+<p>我们需要对证书进行集中化管理，包括颁发证书、解析证书，甚至要定时分析是否有证书过期需要即时续费等，给管理人员一个直观的展示。</p>
+<p>首先安装依赖模块，<code>pyopenssl</code>用于证书解析和<code>python-dateutil</code>模块用于日期解析，使用pip直接安装即可。</p>
+<pre><code class="language-bash">pip install pyopenssl python-dateutil
+</code></pre>
+<p>生成证书脚本</p>
+<pre><code class="language-python">from OpenSSL import crypto
+
+
+k = crypto.PKey()
+k.generate_key(crypto.TYPE_RSA, 2048)  # generate RSA key-pair
+
+cert = crypto.X509()
+cert.get_subject().C = &quot;CN&quot;
+cert.get_subject().O = &quot;XWL, Inc.&quot;
+cert.get_subject().OU = &quot;XWL&quot;
+cert.get_subject().CN = &quot;xwl.io&quot;
+cert.set_serial_number(1000)
+cert.gmtime_adj_notBefore(0)
+cert.gmtime_adj_notAfter(10*365*24*60*60)
+cert.set_issuer(cert.get_subject())
+
+cert.set_pubkey(k)
+cert.sign(k, 'sha256')
+open(&quot;selfsign.crt&quot;, 'wb').write(crypto.dump_certificate(crypto.FILETYPE_PEM, cert))
+open(&quot;private.key&quot;, 'wb').write(crypto.dump_privatekey(crypto.FILETYPE_PEM, k))
+</code></pre>
+<p>直接使用刚刚生成的证书进行解析，具体注释下脚本输出内容中已有说明。</p>
+<pre><code class="language-python">import OpenSSL
+import time
+from dateutil import parser
+
+cert = OpenSSL.crypto.load_certificate(OpenSSL.crypto.FILETYPE_PEM, open(&quot;selfsign.crt&quot;).read())
+certIssue = cert.get_issuer()
+
+print (&quot;证书版本:            &quot;,cert.get_version() + 1)
+
+print (&quot;证书序列号:          &quot;,hex(cert.get_serial_number()))
+
+print (&quot;证书中使用的签名算法: &quot;,cert.get_signature_algorithm().decode(&quot;UTF-8&quot;))
+
+print (&quot;颁发者:              &quot;,certIssue.commonName)
+
+datetime_struct = parser.parse(cert.get_notBefore().decode(&quot;UTF-8&quot;))
+
+print (&quot;有效期从:             &quot;,datetime_struct.strftime('%Y-%m-%d %H:%M:%S'))
+
+datetime_struct = parser.parse(cert.get_notAfter().decode(&quot;UTF-8&quot;))
+
+print (&quot;到:                   &quot;,datetime_struct.strftime('%Y-%m-%d %H:%M:%S'))
+
+print (&quot;证书是否已经过期:      &quot;,cert.has_expired())
+
+print(&quot;公钥长度&quot; ,cert.get_pubkey().bits())
+
+print(&quot;公钥:\n&quot; ,OpenSSL.crypto.dump_publickey(OpenSSL.crypto.FILETYPE_PEM, cert.get_pubkey()).decode(&quot;utf-8&quot;))
+
+print(&quot;主体信息:&quot;)
+
+print(&quot;CN : 通用名称  OU : 机构单元名称&quot;)
+print(&quot;O  : 机构名    L  : 地理位置&quot;)
+print(&quot;S  : 州/省名   C  : 国名&quot;)
+
+for item in certIssue.get_components():
+    print(item[0].decode(&quot;utf-8&quot;), &quot;  ——  &quot;,item[1].decode(&quot;utf-8&quot;))
+
+print(cert.get_extension_count())
+
+subject = cert.get_subject()
+print(&quot;域名:\n&quot; ，subject.CN)
+</code></pre>
+<p>以上就是我们常用的证书管理的操作，以及获取常用证书信息的方法。</p>
 
                         </div>
                         
                             <div class="post-toc">
-                                <ul class="markdownIt-TOC">
-<li>
-<ul>
-<li><a href="#%E5%85%A5%E9%97%A8%E7%AF%87">入门篇</a></li>
-<li><a href="#%E5%8E%9F%E7%90%86%E7%AF%87">原理篇</a></li>
-<li><a href="#%E9%9B%86%E6%88%90%E7%AF%87">集成篇</a></li>
-</ul>
-</li>
-</ul>
-
+                                
                             </div>
                             
                                 
@@ -291,7 +337,7 @@
 
                                                 <p class="copyright-item">
                                                     <span>&#x94FE;&#x63A5;:</span>
-                                                    <span><a href="https://blog.xwl.io/post/WpUHlquQY/">https://blog.xwl.io/post/WpUHlquQY/</a></span>
+                                                    <span><a href="https://blog.xwl.io/post/Aqi_GBQPM/">https://blog.xwl.io/post/Aqi_GBQPM/</a></span>
                                                 </p>
 
                                                 <p class="copyright-item">
@@ -306,9 +352,9 @@
                                                                     <span style="margin-right:15px">
                         <i class="post-share"></i>
                         <span>&#x5206;&#x4EAB;:</span>
-                                                                    <a title="QR 码" target="_blank" href="https://api.qrserver.com/v1/create-qr-code/?size=150x150&data=https://blog.xwl.io/post/WpUHlquQY/"><i class="fa fa-qrcode"></i></a>
-                                                                    <a title="QQ" target="_blank" href="https://sns.qzone.qq.com/cgi-bin/qzshare/cgi_qzshare_onekey?url=https://blog.xwl.io/post/WpUHlquQY/&sharesource=qzone&title=Kubernetes学习路径 &amp; 教程&pics=https://blog.xwl.io/images/avatar.png?v=1620663446951&summary="><i class="fa fa-qq"></i></a>
-                                                                    <a title="新浪微博" target="_blank" href="https://service.weibo.com/share/share.php?url=https://blog.xwl.io/post/WpUHlquQY/&sharesource=weibo&title=Kubernetes学习路径 &amp; 教程 + " - " + &pic="https://blog.xwl.io/images/avatar.png?v=1620663446951 "><i class="fa fa-weibo "></i></a>
+                                                                    <a title="QR 码" target="_blank" href="https://api.qrserver.com/v1/create-qr-code/?size=150x150&data=https://blog.xwl.io/post/Aqi_GBQPM/"><i class="fa fa-qrcode"></i></a>
+                                                                    <a title="QQ" target="_blank" href="https://sns.qzone.qq.com/cgi-bin/qzshare/cgi_qzshare_onekey?url=https://blog.xwl.io/post/Aqi_GBQPM/&sharesource=qzone&title=Python 证书管理&pics=https://blog.xwl.io/images/avatar.png?v=1620663446951&summary="><i class="fa fa-qq"></i></a>
+                                                                    <a title="新浪微博" target="_blank" href="https://service.weibo.com/share/share.php?url=https://blog.xwl.io/post/Aqi_GBQPM/&sharesource=weibo&title=Python 证书管理 + " - " + &pic="https://blog.xwl.io/images/avatar.png?v=1620663446951 "><i class="fa fa-weibo "></i></a>
 
                                                                     </span>
                                                                     
@@ -319,8 +365,8 @@
                                                                                     <span class="tag ">
                         
                         
-                        <a href="https://blog.xwl.io/tag/kubernetes/">#
-                    kubernetes
+                        <a href="https://blog.xwl.io/tag/python/">#
+                    python
                         </a>
                         
                             
@@ -338,13 +384,9 @@
                                                                                 <!---->
                                                                                 <section class="post-nav">
                                                                                     
-                                                                                        <a class="prev" rel="prev" href="https://blog.xwl.io/post/RlIk8BA71/">
-                                                                                            操作系统的上下文切换
-                                                                                        </a>
-                                                                                        
                                                                                             
-                                                                                                <a class="next" rel="next" href="https://blog.xwl.io/post/hhkktAeFo/">
-                                                                                                    kubernetes基础架构
+                                                                                                <a class="next" rel="next" href="https://blog.xwl.io/post/Qc51rd-j-/">
+                                                                                                    使用GitHub Action自动提交网站收录
                                                                                                 </a>
                                                                                                 
                                                                                 </section>
