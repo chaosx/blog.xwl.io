@@ -4,7 +4,7 @@
 <head>
     <meta charset="utf-8" />
 <title>
-    操作系统的上下文切换 | 许大仙的博客
+    Python Vue 部署与联调测试 | 许大仙的博客
 </title>
 <!--[if lt IE 9]><script src="//cdn.bootcss.com/html5shiv/r29/html5.js"></script><![endif]-->
 <meta content="width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=0" name="viewport" />
@@ -221,7 +221,7 @@
                     <article class="post-wrap">
                         <header class="post-header">
                             <h1 class="post-title">
-                                操作系统的上下文切换
+                                Python Vue 部署与联调测试
                             </h1>
                             
                                     <!--zh-->
@@ -230,15 +230,15 @@
                                         <a itemprop="author" rel="author" href="/">
                                             许大仙
                                         </a>
-                                        <span class="post-time">&#x65E5;&#x671F;: <a href="#">2021-04-25</a></span>
+                                        <span class="post-time">&#x65E5;&#x671F;: <a href="#">2021-05-11</a></span>
                                         <span class="post-readtime">&#x9605;&#x8BFB;&#x65F6;&#x95F4;:<a
-                                    href="#">4.2
+                                    href="#">1.9
                                     &#x5206;&#x949F;</a></span>
-                                        <span class="post-words">&#x5B57;&#x6570;:<a href="#">1192</a></span>
+                                        <span class="post-words">&#x5B57;&#x6570;:<a href="#">463</a></span>
                                         
                                             <span class="post-category">&#x5206;&#x7C7B;:
                                 
-                                <a href="https://blog.xwl.io/tag/linux/">linux</a>
+                                <a href="https://blog.xwl.io/tag/python/">python</a>
                                 
                             </span>
                                                 
@@ -247,88 +247,63 @@
                         </header>
                         
                         <div class="post-content">
-                            <h2 id="简介">简介</h2>
-<p>上下文切换 (context switch)指的是内核（操作系统的核心）在CPU上对进程或者线程进行切换；其实际含义是任务切换, 或者CPU寄存器切换</p>
-<p>原因</p>
+                            <p>该项目的目录结构如下</p>
+<pre><code>backend/
+frontend/
+</code></pre>
+<p>backend 目录是后端的 Python 应用，用于给Vue提供相关的API服务<br>
+frontend 目录就是一个Vue应用</p>
+<p>使用<code>vue init webpack frontend</code>，初始化Vue项目目录。</p>
+<p>在frontend中执行<code>npm run build</code>，会构建编译生成一个<code>dist</code>目录，就是其相关的静态文件组，以下我们来展示一下如何应用。</p>
+<p>在backend目录中，初始化Tornado Web，直接从官方扒下来的示例</p>
+<pre><code class="language-python">import tornado.ioloop
+import tornado.web
+
+class MainHandler(tornado.web.RequestHandler):
+    def get(self):
+        self.write(&quot;Hello, world&quot;)
+
+def make_app():
+    return tornado.web.Application([
+        (r&quot;/&quot;, MainHandler),
+    ])
+
+if __name__ == &quot;__main__&quot;:
+    app = make_app()
+    app.listen(8888)
+    tornado.ioloop.IOLoop.current().start()
+</code></pre>
+<p>关于Vue相关的静态文件处理，就是要在Tornado Web中的路由部分，引用其构建编译生成的静态文件。</p>
+<pre><code class="language-python">import os
+ 
+ def make_app():
+    current_path = os.path.dirname(__file__)
+    return tornado.web.Application([
+        (r&quot;/api/index&quot;, MainHandler),
+        (r'^/()$', StaticFileHandler, {&quot;path&quot;:os.path.join(current_path, &quot;frontend/dist&quot;), &quot;default_filename&quot;:&quot;index.html&quot;}),
+        (r'^/(.*)$', StaticFileHandler, {&quot;path&quot;:os.path.join(current_path, &quot;frontend/dist&quot;)}
+    )],
+</code></pre>
+<p>脚本参数说明</p>
 <ul>
-<li>当前正在执行的任务完成，系统的CPU正常调度下一个任务。</li>
-<li>当前正在执行的任务遇到I/O等阻塞操作，调度器挂起此任务，继续调度下一个任务。</li>
-<li>多个任务并发抢占锁资源，当前任务没有抢到锁资源，被调度器挂起，继续调度下一个任务。</li>
-<li>用户的代码挂起当前任务，比如线程执行sleep方法，让出CPU。</li>
-<li>硬件中断。</li>
+<li>其中<code>current_path</code>变量指向该项目的根目录</li>
+<li>通过路由的<code>default_filename</code>参数，指定该条记录默认的访问的HTML路径</li>
 </ul>
-<p>一次系统调用的过程，其实是发生了两次 CPU 上下文切换。（用户态-&gt;内核态-&gt;用户态/同进程内的 CPU 上下文切换）</p>
-<h2 id="调度策略">调度策略</h2>
-<p>处理器给每个线程分配 CPU 时间片（Time Slice），线程在分配获得的时间片内执行任务，一般为几十毫秒。在这么短的时间内线程互相切换，我们根本感觉不到，所以看上去就好像是同时进行的一样。</p>
-<p>就是说，假如同时运行100个线程，CPU为了公平调度，会给每个线程分配时间片，当时间片耗尽之后会立即调度下一个线程（上下文切换）</p>
-<h2 id="线程与进程">线程与进程</h2>
-<p><strong>概念</strong></p>
-<ol>
-<li>当进程只有一个线程时，可以认为进程就等于线程</li>
-<li>当进程拥有多个线程时，这些线程会共享相同的虚拟内存和全局变量等资源。</li>
-<li>线程也有自己的私有数据，比如栈和寄存器等，这些在上下文切换时也是需要保存的</li>
-</ol>
-<p><strong>上下文切换</strong><br>
-前后两个线程属于不同进程。此时，因为资源不共享，所以切换过程就跟进程上下文切换是一样。</p>
-<p>前后两个线程属于同一个进程。此时，因为虚拟内存是共享的，所以在切换时，虚拟内存这些资源就保持不动，只需要切换线程的私有数据、寄存器等不共享的数据</p>
-<h2 id="解释">解释</h2>
-<p>就单核系统而言，单位时间cpu能做的事情是固定的，这个上限并不因为使用多线程切换得到提高。</p>
-<p>多线程出现的意义，就是为了解决IO和CPU之间速度差的冲突，在IO处理等待的时间，CPU可以去处理其他计算任务。</p>
-<p>如果是每个线程一直就是在繁忙的计算，那么多个线程事实上也得不到任何好处，反而因为上下文的切换，要消耗比顺序执行更多的时间。</p>
-<p>特别是在进程上下文切换次数较多的情况下，很容易导致 CPU 将大量时间耗费在寄存器、内核栈以及虚拟内存等资源的保存和恢复上，进而大大缩短了真正运行进程的时间。这也正是导致平均负载升高的一个重要因素。</p>
-<h2 id="优化">优化</h2>
-<ul>
-<li>无锁并发编程</li>
-<li>控制进程/线程数量</li>
-<li>协程，单进程单线程，内部任务切换</li>
-</ul>
-<p>状态监测</p>
-<pre><code>pidstat -w -u 5
-  cswch  ：表示每秒自愿上下文切换的次数
-  nvcswch：表示每秒非自愿上下文切换的次数
+<p>以上配置就能将Tornado和Vue部署在同一个服务中。</p>
+<p>接下来就有另一个问题，我们不可能在开发过程中，每次都构建之后，再重新运行Python服务，那是很痛苦的，所以我们准备在Vue开发环境服务中配置跨域，然后两个服务各自监听端口，进行联调测试。</p>
+<p>我们编辑配置<code>frontend/config/index.js</code>，找到<code>proxyTable</code>字段，修改如下：</p>
+<pre><code class="language-javascript">proxyTable: {
+  '/api': {
+    target: 'http://127.0.0.1:8888/',  
+  },
+},
 </code></pre>
-<p>模拟场景工具</p>
-<ul>
-<li>stress  ：模拟进程、IO</li>
-<li>sysbench：模拟线程数</li>
-</ul>
-<h2 id="在openresty的场景举例">在OpenResty的场景举例</h2>
-<p>推荐配置是worker与CPU保持一致，这里是故意而为之。</p>
-<p>由于worker的设计是单进程单线程的，这里我们的例子将模拟使用1个CPU使用2个worker进程</p>
-<p><strong>正常的上下文切换</strong></p>
-<pre><code>ngx.say(&quot;hello&quot;)
-</code></pre>
-<p>这句话的意思是输出响应体，如果同时有两个用户进来，worker A和B会争抢CPU资源，假设A抢到了资源，那么B将被挂起，等待A执行完毕之后，CPU将会正常调度下一个任务。</p>
-<p><strong>主动的上下文切换</strong></p>
-<pre><code>ngx.sleep(0)
-</code></pre>
-<p>以上操作是用来实现主动让出CPU，使用场景是在CPU密集型的程序段，长时间占用CPU，比如以下代码段</p>
-<pre><code>for i=10000000000000,1,-1 
-do 
-   print(i)
-end
-</code></pre>
-<p><strong>IO阻塞</strong></p>
-<pre><code>os.getenv(&quot;SE_UPSTREAMS&quot;)
-</code></pre>
-<p>假设在access阶段，每个用户访问它都会从系统环境变量中取值，它就会造成阻塞，需要等待它完成之后CPU才会释放。这个过程经历的两次上下文切换（用户态-&gt;内核态-&gt;系统态）。可想而知，在高并发环境下，它将会造成阻塞，且会有大量的上下文切换。</p>
+<p>其中<code>target</code>字段就是我们运行的Tornado服务，我们在Vue项目中访问路径<code>/api/index</code>，即可调用之前预设的HelloWorld接口。</p>
 
                         </div>
                         
                             <div class="post-toc">
-                                <ul class="markdownIt-TOC">
-<li>
-<ul>
-<li><a href="#%E7%AE%80%E4%BB%8B">简介</a></li>
-<li><a href="#%E8%B0%83%E5%BA%A6%E7%AD%96%E7%95%A5">调度策略</a></li>
-<li><a href="#%E7%BA%BF%E7%A8%8B%E4%B8%8E%E8%BF%9B%E7%A8%8B">线程与进程</a></li>
-<li><a href="#%E8%A7%A3%E9%87%8A">解释</a></li>
-<li><a href="#%E4%BC%98%E5%8C%96">优化</a></li>
-<li><a href="#%E5%9C%A8openresty%E7%9A%84%E5%9C%BA%E6%99%AF%E4%B8%BE%E4%BE%8B">在OpenResty的场景举例</a></li>
-</ul>
-</li>
-</ul>
-
+                                
                             </div>
                             
                                 
@@ -342,7 +317,7 @@ end
 
                                                 <p class="copyright-item">
                                                     <span>&#x94FE;&#x63A5;:</span>
-                                                    <span><a href="https://blog.xwl.io/post/RlIk8BA71/">https://blog.xwl.io/post/RlIk8BA71/</a></span>
+                                                    <span><a href="https://blog.xwl.io/post/9LRClFOn3/">https://blog.xwl.io/post/9LRClFOn3/</a></span>
                                                 </p>
 
                                                 <p class="copyright-item">
@@ -357,9 +332,9 @@ end
                                                                     <span style="margin-right:15px">
                         <i class="post-share"></i>
                         <span>&#x5206;&#x4EAB;:</span>
-                                                                    <a title="QR 码" target="_blank" href="https://api.qrserver.com/v1/create-qr-code/?size=150x150&data=https://blog.xwl.io/post/RlIk8BA71/"><i class="fa fa-qrcode"></i></a>
-                                                                    <a title="QQ" target="_blank" href="https://sns.qzone.qq.com/cgi-bin/qzshare/cgi_qzshare_onekey?url=https://blog.xwl.io/post/RlIk8BA71/&sharesource=qzone&title=操作系统的上下文切换&pics=https://blog.xwl.io/images/avatar.png?v=1620750229706&summary="><i class="fa fa-qq"></i></a>
-                                                                    <a title="新浪微博" target="_blank" href="https://service.weibo.com/share/share.php?url=https://blog.xwl.io/post/RlIk8BA71/&sharesource=weibo&title=操作系统的上下文切换 + " - " + &pic="https://blog.xwl.io/images/avatar.png?v=1620750229706 "><i class="fa fa-weibo "></i></a>
+                                                                    <a title="QR 码" target="_blank" href="https://api.qrserver.com/v1/create-qr-code/?size=150x150&data=https://blog.xwl.io/post/9LRClFOn3/"><i class="fa fa-qrcode"></i></a>
+                                                                    <a title="QQ" target="_blank" href="https://sns.qzone.qq.com/cgi-bin/qzshare/cgi_qzshare_onekey?url=https://blog.xwl.io/post/9LRClFOn3/&sharesource=qzone&title=Python Vue 部署与联调测试&pics=https://blog.xwl.io/images/avatar.png?v=1620750229706&summary="><i class="fa fa-qq"></i></a>
+                                                                    <a title="新浪微博" target="_blank" href="https://service.weibo.com/share/share.php?url=https://blog.xwl.io/post/9LRClFOn3/&sharesource=weibo&title=Python Vue 部署与联调测试 + " - " + &pic="https://blog.xwl.io/images/avatar.png?v=1620750229706 "><i class="fa fa-weibo "></i></a>
 
                                                                     </span>
                                                                     
@@ -370,8 +345,8 @@ end
                                                                                     <span class="tag ">
                         
                         
-                        <a href="https://blog.xwl.io/tag/linux/">#
-                    linux
+                        <a href="https://blog.xwl.io/tag/python/">#
+                    python
                         </a>
                         
                             
@@ -389,13 +364,9 @@ end
                                                                                 <!---->
                                                                                 <section class="post-nav">
                                                                                     
-                                                                                        <a class="prev" rel="prev" href="https://blog.xwl.io/post/tgfaCQjnt/">
-                                                                                            来自长假第一天的挣扎
-                                                                                        </a>
-                                                                                        
                                                                                             
-                                                                                                <a class="next" rel="next" href="https://blog.xwl.io/post/WpUHlquQY/">
-                                                                                                    Kubernetes学习路径 &amp; 教程
+                                                                                                <a class="next" rel="next" href="https://blog.xwl.io/post/Aqi_GBQPM/">
+                                                                                                    Python 证书管理
                                                                                                 </a>
                                                                                                 
                                                                                 </section>
