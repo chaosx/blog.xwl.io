@@ -4,7 +4,7 @@
 <head>
     <meta charset="utf-8" />
 <title>
-    关于 | 许大仙的博客
+    Python AES/CBC/PKCS5Padding 加解密 | 许大仙的博客
 </title>
 <!--[if lt IE 9]><script src="//cdn.bootcss.com/html5shiv/r29/html5.js"></script><![endif]-->
 <meta content="width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=0" name="viewport" />
@@ -221,7 +221,7 @@
                     <article class="post-wrap">
                         <header class="post-header">
                             <h1 class="post-title">
-                                关于
+                                Python AES/CBC/PKCS5Padding 加解密
                             </h1>
                             
                                     <!--zh-->
@@ -230,42 +230,155 @@
                                         <a itemprop="author" rel="author" href="/">
                                             许大仙
                                         </a>
-                                        <span class="post-time">&#x65E5;&#x671F;: <a href="#">2021-04-10</a></span>
+                                        <span class="post-time">&#x65E5;&#x671F;: <a href="#">2021-05-13</a></span>
                                         <span class="post-readtime">&#x9605;&#x8BFB;&#x65F6;&#x95F4;:<a
-                                    href="#">1.7
+                                    href="#">3.8
                                     &#x5206;&#x949F;</a></span>
-                                        <span class="post-words">&#x5B57;&#x6570;:<a href="#">510</a></span>
+                                        <span class="post-words">&#x5B57;&#x6570;:<a href="#">804</a></span>
                                         
+                                            <span class="post-category">&#x5206;&#x7C7B;:
+                                
+                                <a href="https://blog.xwl.io/tag/python/">python</a>
+                                
+                            </span>
+                                                
                                     </div>
                                     
                         </header>
                         
                         <div class="post-content">
                             <blockquote>
-<p>欢迎来到我的小站呀，很高兴遇见你！🤝</p>
+<p>以下内容来源于网络</p>
 </blockquote>
-<h2 id="关于本站">🏠 关于本站</h2>
-<p>积累知识，构建体系，建立知识不朽帝国。</p>
-<h2 id="博主是谁">👨‍💻 博主是谁</h2>
-<p>许文龙，外号许大仙。</p>
-<p>一枚小运维，会点开发，带点天真，干活利索，技术优秀。</p>
-<h2 id="个人崇拜">👍 个人崇拜</h2>
-<p>我们都不推崇搞这些套路，但成长的路上，总有一些人在你心中不可替代，视为偶像。</p>
+<h2 id="aes简介">AES简介</h2>
+<p>AES加密是建立在DES加密不能满足破解难度而产生的。由比利时两位非常著名的密码学家Joan Daemen和Vincent Rijmen设计，选取了分组长度为128byte，密钥长度为128byte、192byte和byte比特的三个版本。 分组密码有五种工作体制：</p>
 <ul>
-<li>章亦春</li>
+<li>电码本模式Electronic Codebook Book (ECB)</li>
+<li>密码分组链接模式Cipher Block Chaining (CBC)</li>
+<li>计算器模式Counter (CTR)</li>
+<li>密码反馈模式Cipher FeedBack (CFB)</li>
+<li>输出反馈模式Output FeedBack (OFB)</li>
 </ul>
-<p>初识春哥，也是在他的<a href="http://openresty.org/download/agentzh-nginx-tutorials-zhcn.html">Nginx教程</a>上，作为运维，也是必学的服务之一。随后接触了其开源项目<a href="https://github.com/openresty/">OpenResty</a>之后，在社区混迹之下逐渐了解，之所以推崇，不仅仅是因为他的技术能力非常强，也是因为他的热爱，在这条道路上坚持，并付诸实践，以及持续输出，十年如一日。</p>
-<p>当然也有主观因素，他的技术栈是和我理想中非常匹配的，也喜欢折腾很多有趣的东西，只是我的技术能力还只能望之项背。</p>
+<h2 id="cbc模式">CBC模式</h2>
+<p>优点：</p>
 <ul>
-<li>孙圈圈</li>
+<li>不容易主动攻击,安全性好于ECB,适合传输长度长的报文,是SSL、IPSec的标准。</li>
 </ul>
-<blockquote>
-<p>当大部分男生们开始倾慕孙圈圈这样的女生，而不是荧幕前的花瓶的时候，我不敢想象那样的社会是多么精彩 - <a href="https://www.zhihu.com/people/chenjun-rui">知乎/Chen君瑞</a></p>
-</blockquote>
-<p>最初也是在微信公众号上挖掘的宝藏姐姐，分享了很多干货，都非常实用。那时我也刚毕业不久，充满着迷茫她像知心大姐姐一样为我拨开云雾，经常让我惊叹，原来是这样的，这是我在应试教育里是从来没有接触过的。</p>
-<p>随后她创建了<a href="https://www.iquanwai.com">圈外商学院</a>，一路学习下来，这也是个非常棒的课程。我是个理工男，在我的人生中，我一直认为，只有技术才是立足之本。但你到最后才会发现，并不是所有人都有天赋做到行业顶尖的，那些平常让人忽略的能力，却能为之大用。</p>
-<h2 id="联系我呀">📬 联系我呀</h2>
-<p>mailto: <a href="mailto:hi@xwl.io">hi@xwl.io</a></p>
+<p>缺点：</p>
+<ul>
+<li>不利于并行计算；</li>
+<li>误差传递；</li>
+<li>需要初始化向量IV</li>
+</ul>
+<p>以下是代码示例：</p>
+<pre><code class="language-python">#!/usr/bin/python3
+# -*- coding: utf-8 -*-
+import logging
+import base64
+import hashlib
+import binascii
+from Crypto.Cipher import AES
+ 
+ 
+class AESCrypt:
+    &quot;&quot;&quot;
+    AES/CBC/PKCS5Padding 加密
+    &quot;&quot;&quot;
+    def __init__(self, key):
+        &quot;&quot;&quot;
+        使用密钥,加密模式进行初始化
+        :param key:
+        &quot;&quot;&quot;
+        if len(key) != 16:
+            raise RuntimeError('密钥长度非16位!!!')
+ 
+        self.key = str.encode(key)
+        self.iv = bytes(16)
+        self.MODE = AES.MODE_CBC
+        self.block_size = 16
+ 
+        # 填充函数
+        # self.padding = lambda data: data + (self.block_size - len(data) % self.block_size) * chr(self.block_size - len(data) % self.block_size)
+        # 此处为一坑,需要现将data转换为byte再来做填充，否则中文特殊字符等会报错
+        self.padding = lambda data: data + (self.block_size - len(data.encode('utf-8')) % self.block_size) * chr(self.block_size - len(data.encode('utf-8')) % self.block_size)
+        # 截断函数
+        self.unpadding = lambda data: data[:-ord(data[-1])]
+ 
+    def aes_encrypt(self, plaintext):
+        &quot;&quot;&quot;
+        加密
+        :param plaintext: 明文
+        :return:
+        &quot;&quot;&quot;
+        try:
+            # 填充16位
+            padding_text = self.padding(plaintext).encode(&quot;utf-8&quot;)
+            # 初始化加密器
+            cryptor = AES.new(self.key, self.MODE, self.iv)
+            # 进行AES加密
+            encrypt_aes = cryptor.encrypt(padding_text)
+            # 进行BASE64转码
+            encrypt_text = (base64.b64encode(encrypt_aes)).decode()
+            return encrypt_text
+        except Exception as e:
+            logging.exception(e)
+ 
+    def aes_decrypt(self, ciphertext):
+        &quot;&quot;&quot;
+        解密
+        :param ciphertext: 密文
+        :return:
+        &quot;&quot;&quot;
+        try:
+            # 密文必须是16byte的整数倍
+            # if len(ciphertext) % 16 != 0:
+            #     raise binascii.Error('密文错误!')
+            cryptor = AES.new(self.key, self.MODE, self.iv)
+            # 进行BASE64转码
+            plain_base64 = base64.b64decode(ciphertext)
+            # 进行ASE解密
+            decrypt_text = cryptor.decrypt(plain_base64)
+            # 截取
+            plain_text = self.unpadding(decrypt_text.decode(&quot;utf-8&quot;))
+            return plain_text
+        except UnicodeDecodeError as e:
+            logging.error('解密失败,请检查密钥是否正确!')
+            logging.exception(e)
+        except binascii.Error as e:
+            logging.exception(e)
+        except Exception as e:
+            logging.exception(e)
+ 
+ 
+if __name__ == '__main__':
+	# 测试
+    cryptor = AESCrypt('ZGJfXxZNGPqWAC53')
+    aes_encrypt_str = cryptor.aes_encrypt('原谅我个渣渣!!!')
+    print(f'加密结果为: {aes_encrypt_str}')
+    aes_decrypt_str = cryptor.aes_decrypt('KMpLeX7zYGc3SBZi55/BR0VnMybZb29CrFJFl3ac8/k=')
+    print(f'解密结果为: {aes_decrypt_str}')
+</code></pre>
+<h2 id="遇到的问题">遇到的问题</h2>
+<h3 id="keydataiv未转byte报错">key，data，iv未转byte报错</h3>
+<p><code>TypeError: Object type &lt;class 'str'&gt; cannot be passed to C code</code></p>
+<p>解决方案<br>
+key，data，iv均需要转为byte类型</p>
+<pre><code class="language-python">key = str.encode(key)
+iv = bytes(16)
+text = text.encode(&quot;utf-8&quot;)
+</code></pre>
+<h3 id="中文特殊字符加密报错">中文/特殊字符加密报错</h3>
+<p><code>ValueError: Data must be padded to 16 byte boundary in CBC mode。</code></p>
+<p>解决方案：现将data转成字节之后在进行填充，始终可保证字节数为16byte的整数倍</p>
+<pre><code class="language-python">self.padding = lambda data: data + (block_size - len(data.encode('utf-8')) % block_size) * chr(block_size - len(data.encode('utf-8')) % block_size)
+</code></pre>
+<h3 id="密文修改后不是16byte的整数倍返回填充错误">密文修改后，不是16byte的整数倍，返回填充错误</h3>
+<p><code>return binascii.a2b_base64(s) binascii.Error: Incorrect padding</code></p>
+<p>解决方案：提前检查密文长度抛出异常或者直接进行异常捕获 binascii.Error</p>
+<pre><code class="language-python"># 密文必须是16byte的整数倍
+if len(ciphertext) % 16 != 0:
+    raise binascii.Error('密文错误!')
+</code></pre>
 
                         </div>
                         
@@ -273,10 +386,15 @@
                                 <ul class="markdownIt-TOC">
 <li>
 <ul>
-<li><a href="#%E5%85%B3%E4%BA%8E%E6%9C%AC%E7%AB%99">🏠 关于本站</a></li>
-<li><a href="#%E5%8D%9A%E4%B8%BB%E6%98%AF%E8%B0%81">👨‍💻 博主是谁</a></li>
-<li><a href="#%E4%B8%AA%E4%BA%BA%E5%B4%87%E6%8B%9C">👍 个人崇拜</a></li>
-<li><a href="#%E8%81%94%E7%B3%BB%E6%88%91%E5%91%80">📬 联系我呀</a></li>
+<li><a href="#aes%E7%AE%80%E4%BB%8B">AES简介</a></li>
+<li><a href="#cbc%E6%A8%A1%E5%BC%8F">CBC模式</a></li>
+<li><a href="#%E9%81%87%E5%88%B0%E7%9A%84%E9%97%AE%E9%A2%98">遇到的问题</a>
+<ul>
+<li><a href="#keydataiv%E6%9C%AA%E8%BD%ACbyte%E6%8A%A5%E9%94%99">key，data，iv未转byte报错</a></li>
+<li><a href="#%E4%B8%AD%E6%96%87%E7%89%B9%E6%AE%8A%E5%AD%97%E7%AC%A6%E5%8A%A0%E5%AF%86%E6%8A%A5%E9%94%99">中文/特殊字符加密报错</a></li>
+<li><a href="#%E5%AF%86%E6%96%87%E4%BF%AE%E6%94%B9%E5%90%8E%E4%B8%8D%E6%98%AF16byte%E7%9A%84%E6%95%B4%E6%95%B0%E5%80%8D%E8%BF%94%E5%9B%9E%E5%A1%AB%E5%85%85%E9%94%99%E8%AF%AF">密文修改后，不是16byte的整数倍，返回填充错误</a></li>
+</ul>
+</li>
 </ul>
 </li>
 </ul>
@@ -294,7 +412,7 @@
 
                                                 <p class="copyright-item">
                                                     <span>&#x94FE;&#x63A5;:</span>
-                                                    <span><a href="https://blog.xwl.io/post/about/">https://blog.xwl.io/post/about/</a></span>
+                                                    <span><a href="https://blog.xwl.io/post/NYZgYN2ak/">https://blog.xwl.io/post/NYZgYN2ak/</a></span>
                                                 </p>
 
                                                 <p class="copyright-item">
@@ -309,9 +427,9 @@
                                                                     <span style="margin-right:15px">
                         <i class="post-share"></i>
                         <span>&#x5206;&#x4EAB;:</span>
-                                                                    <a title="QR 码" target="_blank" href="https://api.qrserver.com/v1/create-qr-code/?size=150x150&data=https://blog.xwl.io/post/about/"><i class="fa fa-qrcode"></i></a>
-                                                                    <a title="QQ" target="_blank" href="https://sns.qzone.qq.com/cgi-bin/qzshare/cgi_qzshare_onekey?url=https://blog.xwl.io/post/about/&sharesource=qzone&title=关于&pics=https://blog.xwl.io/images/avatar.png?v=1620836053309&summary="><i class="fa fa-qq"></i></a>
-                                                                    <a title="新浪微博" target="_blank" href="https://service.weibo.com/share/share.php?url=https://blog.xwl.io/post/about/&sharesource=weibo&title=关于 + " - " + &pic="https://blog.xwl.io/images/avatar.png?v=1620836053309 "><i class="fa fa-weibo "></i></a>
+                                                                    <a title="QR 码" target="_blank" href="https://api.qrserver.com/v1/create-qr-code/?size=150x150&data=https://blog.xwl.io/post/NYZgYN2ak/"><i class="fa fa-qrcode"></i></a>
+                                                                    <a title="QQ" target="_blank" href="https://sns.qzone.qq.com/cgi-bin/qzshare/cgi_qzshare_onekey?url=https://blog.xwl.io/post/NYZgYN2ak/&sharesource=qzone&title=Python AES/CBC/PKCS5Padding 加解密&pics=https://blog.xwl.io/images/avatar.png?v=1620836053309&summary="><i class="fa fa-qq"></i></a>
+                                                                    <a title="新浪微博" target="_blank" href="https://service.weibo.com/share/share.php?url=https://blog.xwl.io/post/NYZgYN2ak/&sharesource=weibo&title=Python AES/CBC/PKCS5Padding 加解密 + " - " + &pic="https://blog.xwl.io/images/avatar.png?v=1620836053309 "><i class="fa fa-weibo "></i></a>
 
                                                                     </span>
                                                                     
@@ -321,6 +439,12 @@
                                                                                     <span>&#x6807;&#x7B7E;:</span>
                                                                                     <span class="tag ">
                         
+                        
+                        <a href="https://blog.xwl.io/tag/python/">#
+                    python
+                        </a>
+                        
+                            
                                 </span>
                                                                                 </div>
                                                                                 <div>
@@ -336,6 +460,10 @@
                                                                                 <section class="post-nav">
                                                                                     
                                                                                             
+                                                                                                <a class="next" rel="next" href="https://blog.xwl.io/post/9LRClFOn3/">
+                                                                                                    Python Vue 部署与联调测试
+                                                                                                </a>
+                                                                                                
                                                                                 </section>
                                                                                 
                                                                                     <script type="application/javascript" src="//unpkg.com/valine@latest/dist/Valine.min.js"></script>
