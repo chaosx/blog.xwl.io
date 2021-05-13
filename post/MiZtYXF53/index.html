@@ -4,7 +4,7 @@
 <head>
     <meta charset="utf-8" />
 <title>
-    Python Vue 部署与联调测试 | 许大仙的博客
+    职场人如何汇报工作 | 许大仙的博客
 </title>
 <!--[if lt IE 9]><script src="//cdn.bootcss.com/html5shiv/r29/html5.js"></script><![endif]-->
 <meta content="width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=0" name="viewport" />
@@ -221,7 +221,7 @@
                     <article class="post-wrap">
                         <header class="post-header">
                             <h1 class="post-title">
-                                Python Vue 部署与联调测试
+                                职场人如何汇报工作
                             </h1>
                             
                                     <!--zh-->
@@ -230,15 +230,15 @@
                                         <a itemprop="author" rel="author" href="/">
                                             许大仙
                                         </a>
-                                        <span class="post-time">&#x65E5;&#x671F;: <a href="#">2021-05-11</a></span>
+                                        <span class="post-time">&#x65E5;&#x671F;: <a href="#">2021-05-14</a></span>
                                         <span class="post-readtime">&#x9605;&#x8BFB;&#x65F6;&#x95F4;:<a
-                                    href="#">1.9
+                                    href="#">3.4
                                     &#x5206;&#x949F;</a></span>
-                                        <span class="post-words">&#x5B57;&#x6570;:<a href="#">463</a></span>
+                                        <span class="post-words">&#x5B57;&#x6570;:<a href="#">995</a></span>
                                         
                                             <span class="post-category">&#x5206;&#x7C7B;:
                                 
-                                <a href="https://blog.xwl.io/tag/python/">python</a>
+                                <a href="https://blog.xwl.io/tag/personal-growth/">个人成长</a>
                                 
                             </span>
                                                 
@@ -247,63 +247,89 @@
                         </header>
                         
                         <div class="post-content">
-                            <p>该项目的目录结构如下</p>
-<pre><code>backend/
-frontend/
-</code></pre>
-<p>backend 目录是后端的 Python 应用，用于给Vue提供相关的API服务<br>
-frontend 目录就是一个Vue应用</p>
-<p>使用<code>vue init webpack frontend</code>，初始化Vue项目目录。</p>
-<p>在frontend中执行<code>npm run build</code>，会构建编译生成一个<code>dist</code>目录，就是其相关的静态文件组，以下我们来展示一下如何应用。</p>
-<p>在backend目录中，初始化Tornado Web，直接从官方扒下来的示例</p>
-<pre><code class="language-python">import tornado.ioloop
-import tornado.web
-
-class MainHandler(tornado.web.RequestHandler):
-    def get(self):
-        self.write(&quot;Hello, world&quot;)
-
-def make_app():
-    return tornado.web.Application([
-        (r&quot;/&quot;, MainHandler),
-    ])
-
-if __name__ == &quot;__main__&quot;:
-    app = make_app()
-    app.listen(8888)
-    tornado.ioloop.IOLoop.current().start()
-</code></pre>
-<p>关于Vue相关的静态文件处理，就是要在Tornado Web中的路由部分，引用其构建编译生成的静态文件。</p>
-<pre><code class="language-python">import os
- 
-def make_app():
-    current_path = os.path.dirname(__file__)
-    return tornado.web.Application([
-        (r&quot;/api/index&quot;, MainHandler),
-        (r'^/()$', StaticFileHandler, {&quot;path&quot;:os.path.join(current_path, &quot;frontend/dist&quot;), &quot;default_filename&quot;:&quot;index.html&quot;}),
-        (r'^/(.*)$', StaticFileHandler, {&quot;path&quot;:os.path.join(current_path, &quot;frontend/dist&quot;)}
-    )],
-</code></pre>
-<p>脚本参数说明</p>
+                            <p>有句话说的好，职场中，不要总是埋头苦干，要懂得表现自己！</p>
+<p>当年我也是想着，只要自己有工作能力，而且自己足够的努力，老板就一定能发现。</p>
+<p>这种单纯的想法一直伴随了我几年，后来我才发现，酒香也怕巷子深，我们时刻要学会自我营销。</p>
+<h2 id="为什么需要汇报工作">为什么需要汇报工作</h2>
 <ul>
-<li>其中<code>current_path</code>变量指向该项目的根目录</li>
-<li>通过路由的<code>default_filename</code>参数，指定该条记录默认的访问的HTML路径</li>
+<li>展现自己的工作能力</li>
 </ul>
-<p>以上配置就能将Tornado和Vue部署在同一个服务中。</p>
-<p>接下来就有另一个问题，我们不可能在开发过程中，每次都构建之后，再重新运行Python服务，那是很痛苦的，所以我们准备在Vue开发环境服务中配置跨域，然后两个服务各自监听端口，进行联调测试。</p>
-<p>我们编辑配置<code>frontend/config/index.js</code>，找到<code>proxyTable</code>字段，修改如下：</p>
-<pre><code class="language-javascript">proxyTable: {
-  '/api': {
-    target: 'http://127.0.0.1:8888/',  
-  },
-},
-</code></pre>
-<p>其中<code>target</code>字段就是我们运行的Tornado服务，我们在Vue项目中访问路径<code>/api/index</code>，即可调用之前预设的HelloWorld接口。</p>
+<p>日常工作中你需要及时汇报，将你的工作成果展现给领导，让他知道你能担当大任。</p>
+<ul>
+<li>领导有掌控感，对你更放心</li>
+</ul>
+<p>我们有时候很难接受，觉得老板为什么三天两头问我工作如何了，但想象一下等外卖，其实就可以理解，所以你需要转变心态，主动汇报。</p>
+<p>让上司获得掌控感，他会对你放心，也更信任你的工作能力。</p>
+<p>任何一个上司都比较看重两样东西：一是他的上司对他的信任；二是他的下属对他的尊重。</p>
+<p>而上下级的信任和尊重，靠的就是及时的汇报工作！</p>
+<h2 id="怎样汇报工作">怎样汇报工作</h2>
+<p>以下是汇报工作常见的三个场景，对号入座即可。</p>
+<h3 id="突然提问-如何化被动为主动">突然提问 - 如何化被动为主动</h3>
+<p>关键的5秒钟</p>
+<ol>
+<li>认可对方的提问</li>
+<li>澄清对方的问题，为自己争取思考的时间。</li>
+</ol>
+<p>思路</p>
+<ul>
+<li>认可对方提问</li>
+</ul>
+<p>我正准备向你汇报呢，您问的太及时了</p>
+<ul>
+<li>确认对方问题</li>
+</ul>
+<p>你说的这期XX活动目前已经完成70%</p>
+<ul>
+<li>详细汇报接下来的任务</li>
+</ul>
+<p>接下来我要XXX做，采取XXX方法，预计XXX时候就可以完成，<br>
+前期确实遇到了XXX问题，但是我做了XXX，这个项目目前进展顺利</p>
+<h3 id="汇报问题-给出解决方案别忘记">汇报问题 - 给出解决方案别忘记</h3>
+<p>遇到了我们解决不了的，或者不再我们计划内的事情，正确的方法应该是带着解决方案去汇报。</p>
+<p>解决方案最好有2个，要让老板做选择题</p>
+<ol>
+<li>目前出现的问题</li>
+<li>阐述发生问题的原因</li>
+<li>给出你认为可行的解决方案</li>
+</ol>
+<p>思路<br>
+问题原因：老板，这周五的活动嘉宾方面出了点小问题。我按计划邀请了A嘉宾，他也的确答应了。但刚收到微信消息，他说临时有事无法到场。</p>
+<p>解决方案供老板选择：目前有2种可行解决方案。</p>
+<ol>
+<li>现在去尝试邀请大咖B，代替A嘉宾</li>
+<li>重新调整活动策划，把涉及到A嘉宾的部分都修改掉。您觉得哪个更合适呢？</li>
+</ol>
+<p>这样说，基本上你的汇报就达到了90分，如果升级一下思维，你还可以站在老板的角度，对这两个方案做利弊分析，帮助老板更好地决策。比如，你可以继续补充：</p>
+<p>方案1的话，临时找，时间上很紧张，需要您出面去邀请。万一他也没有答应，我们就很被动了。<br>
+方案2的话，整体变化大，各团队都要同步信息共同应对。</p>
+<p>最后把决定权交给领导，领导会以比你更高的眼光或者从他的角度指示你去按照哪种方法去做。</p>
+<p>解决方案最好有2个，要让老板做选择题</p>
+<h3 id="汇报成果-多用数据和讲故事的方法">汇报成果 - 多用数据和讲故事的方法</h3>
+<p>汇报成果往往是在一个项目或一个任务结束后进行。</p>
+<p>那怎么才能让成果汇报出彩呢？</p>
+<p>我的建议是使用关键数据和故事，数据是理性呈现，故事是感性打动，只有理性和感性相结合，才能给人留下深刻印象。</p>
+<h2 id="参考">参考</h2>
+<p><a href="https://mp.weixin.qq.com/s/vaJy7BfPyucpE_ZRK0EMjg">领导为什么不喜欢提拔老实人？这是我听过最醍醐灌顶的答案。</a></p>
 
                         </div>
                         
                             <div class="post-toc">
-                                
+                                <ul class="markdownIt-TOC">
+<li>
+<ul>
+<li><a href="#%E4%B8%BA%E4%BB%80%E4%B9%88%E9%9C%80%E8%A6%81%E6%B1%87%E6%8A%A5%E5%B7%A5%E4%BD%9C">为什么需要汇报工作</a></li>
+<li><a href="#%E6%80%8E%E6%A0%B7%E6%B1%87%E6%8A%A5%E5%B7%A5%E4%BD%9C">怎样汇报工作</a>
+<ul>
+<li><a href="#%E7%AA%81%E7%84%B6%E6%8F%90%E9%97%AE-%E5%A6%82%E4%BD%95%E5%8C%96%E8%A2%AB%E5%8A%A8%E4%B8%BA%E4%B8%BB%E5%8A%A8">突然提问 - 如何化被动为主动</a></li>
+<li><a href="#%E6%B1%87%E6%8A%A5%E9%97%AE%E9%A2%98-%E7%BB%99%E5%87%BA%E8%A7%A3%E5%86%B3%E6%96%B9%E6%A1%88%E5%88%AB%E5%BF%98%E8%AE%B0">汇报问题 - 给出解决方案别忘记</a></li>
+<li><a href="#%E6%B1%87%E6%8A%A5%E6%88%90%E6%9E%9C-%E5%A4%9A%E7%94%A8%E6%95%B0%E6%8D%AE%E5%92%8C%E8%AE%B2%E6%95%85%E4%BA%8B%E7%9A%84%E6%96%B9%E6%B3%95">汇报成果 - 多用数据和讲故事的方法</a></li>
+</ul>
+</li>
+<li><a href="#%E5%8F%82%E8%80%83">参考</a></li>
+</ul>
+</li>
+</ul>
+
                             </div>
                             
                                 
@@ -317,7 +343,7 @@ def make_app():
 
                                                 <p class="copyright-item">
                                                     <span>&#x94FE;&#x63A5;:</span>
-                                                    <span><a href="https://blog.xwl.io/post/9LRClFOn3/">https://blog.xwl.io/post/9LRClFOn3/</a></span>
+                                                    <span><a href="https://blog.xwl.io/post/MiZtYXF53/">https://blog.xwl.io/post/MiZtYXF53/</a></span>
                                                 </p>
 
                                                 <p class="copyright-item">
@@ -332,9 +358,9 @@ def make_app():
                                                                     <span style="margin-right:15px">
                         <i class="post-share"></i>
                         <span>&#x5206;&#x4EAB;:</span>
-                                                                    <a title="QR 码" target="_blank" href="https://api.qrserver.com/v1/create-qr-code/?size=150x150&data=https://blog.xwl.io/post/9LRClFOn3/"><i class="fa fa-qrcode"></i></a>
-                                                                    <a title="QQ" target="_blank" href="https://sns.qzone.qq.com/cgi-bin/qzshare/cgi_qzshare_onekey?url=https://blog.xwl.io/post/9LRClFOn3/&sharesource=qzone&title=Python Vue 部署与联调测试&pics=https://blog.xwl.io/images/avatar.png?v=1620925553344&summary="><i class="fa fa-qq"></i></a>
-                                                                    <a title="新浪微博" target="_blank" href="https://service.weibo.com/share/share.php?url=https://blog.xwl.io/post/9LRClFOn3/&sharesource=weibo&title=Python Vue 部署与联调测试 + " - " + &pic="https://blog.xwl.io/images/avatar.png?v=1620925553344 "><i class="fa fa-weibo "></i></a>
+                                                                    <a title="QR 码" target="_blank" href="https://api.qrserver.com/v1/create-qr-code/?size=150x150&data=https://blog.xwl.io/post/MiZtYXF53/"><i class="fa fa-qrcode"></i></a>
+                                                                    <a title="QQ" target="_blank" href="https://sns.qzone.qq.com/cgi-bin/qzshare/cgi_qzshare_onekey?url=https://blog.xwl.io/post/MiZtYXF53/&sharesource=qzone&title=职场人如何汇报工作&pics=https://blog.xwl.io/images/avatar.png?v=1620925553344&summary="><i class="fa fa-qq"></i></a>
+                                                                    <a title="新浪微博" target="_blank" href="https://service.weibo.com/share/share.php?url=https://blog.xwl.io/post/MiZtYXF53/&sharesource=weibo&title=职场人如何汇报工作 + " - " + &pic="https://blog.xwl.io/images/avatar.png?v=1620925553344 "><i class="fa fa-weibo "></i></a>
 
                                                                     </span>
                                                                     
@@ -345,8 +371,8 @@ def make_app():
                                                                                     <span class="tag ">
                         
                         
-                        <a href="https://blog.xwl.io/tag/python/">#
-                    python
+                        <a href="https://blog.xwl.io/tag/personal-growth/">#
+                    个人成长
                         </a>
                         
                             
@@ -364,13 +390,9 @@ def make_app():
                                                                                 <!---->
                                                                                 <section class="post-nav">
                                                                                     
-                                                                                        <a class="prev" rel="prev" href="https://blog.xwl.io/post/NYZgYN2ak/">
-                                                                                            Python AES/CBC/PKCS5Padding 加解密
-                                                                                        </a>
-                                                                                        
                                                                                             
-                                                                                                <a class="next" rel="next" href="https://blog.xwl.io/post/Aqi_GBQPM/">
-                                                                                                    Python 证书管理
+                                                                                                <a class="next" rel="next" href="https://blog.xwl.io/post/NYZgYN2ak/">
+                                                                                                    Python AES/CBC/PKCS5Padding 加解密
                                                                                                 </a>
                                                                                                 
                                                                                 </section>
