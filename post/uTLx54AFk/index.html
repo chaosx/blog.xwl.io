@@ -4,7 +4,7 @@
 <head>
     <meta charset="utf-8" />
 <title>
-    Python 证书管理 | 许大仙的博客
+    Python 监控域名信息 | 许大仙的博客
 </title>
 <!--[if lt IE 9]><script src="//cdn.bootcss.com/html5shiv/r29/html5.js"></script><![endif]-->
 <meta content="width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=0" name="viewport" />
@@ -221,7 +221,7 @@
                     <article class="post-wrap">
                         <header class="post-header">
                             <h1 class="post-title">
-                                Python 证书管理
+                                Python 监控域名信息
                             </h1>
                             
                                     <!--zh-->
@@ -230,11 +230,11 @@
                                         <a itemprop="author" rel="author" href="/">
                                             许大仙
                                         </a>
-                                        <span class="post-time">&#x65E5;&#x671F;: <a href="#">2021-05-11</a></span>
+                                        <span class="post-time">&#x65E5;&#x671F;: <a href="#">2021-05-15</a></span>
                                         <span class="post-readtime">&#x9605;&#x8BFB;&#x65F6;&#x95F4;:<a
-                                    href="#">2.5
+                                    href="#">2.6
                                     &#x5206;&#x949F;</a></span>
-                                        <span class="post-words">&#x5B57;&#x6570;:<a href="#">528</a></span>
+                                        <span class="post-words">&#x5B57;&#x6570;:<a href="#">549</a></span>
                                         
                                             <span class="post-category">&#x5206;&#x7C7B;:
                                 
@@ -247,83 +247,95 @@
                         </header>
                         
                         <div class="post-content">
-                            <p>在开发运维平台的时候，都有绕不过的一个需求，那就是对网站证书的管理。</p>
-<p>我们需要对证书进行集中化管理，包括颁发证书、解析证书，甚至要定时分析是否有证书过期需要即时续费等，给管理人员一个直观的展示。</p>
-<p>首先安装依赖模块，<code>pyopenssl</code>用于证书解析和<code>python-dateutil</code>模块用于日期解析，使用pip直接安装即可。</p>
-<pre><code class="language-bash">pip install pyopenssl python-dateutil
+                            <p>我们对于域名的管理，主要需要监控的状态包括域名过期时间、域名的证书过期时间，就简单介绍一下。</p>
+<p>通常会在阿里云，或者腾讯云这类主流平台购买域名和证书，通常都会有相关的API接口可供查询，这里就不介绍相关SDK的使用了。</p>
+<p>我们使用更加通用的方式来监控域名，获取其相关信息。</p>
+<h2 id="查询域名过期时间">查询域名过期时间</h2>
+<p>就非常简单的示例，先安装依赖包</p>
+<pre><code class="language-shell">pip install whois
 </code></pre>
-<p>生成证书脚本</p>
-<pre><code class="language-python">from OpenSSL import crypto
+<p>示例代码</p>
+<pre><code class="language-python">import whois
 
+domain = whois.query(&quot;xwl.io&quot;)
+print(domain.__dict__)
 
-k = crypto.PKey()
-k.generate_key(crypto.TYPE_RSA, 2048)  # generate RSA key-pair
-
-cert = crypto.X509()
-cert.get_subject().C = &quot;CN&quot;
-cert.get_subject().O = &quot;XWL, Inc.&quot;
-cert.get_subject().OU = &quot;XWL&quot;
-cert.get_subject().CN = &quot;xwl.io&quot;
-cert.set_serial_number(1000)
-cert.gmtime_adj_notBefore(0)
-cert.gmtime_adj_notAfter(10*365*24*60*60)
-cert.set_issuer(cert.get_subject())
-
-cert.set_pubkey(k)
-cert.sign(k, 'sha256')
-open(&quot;selfsign.crt&quot;, 'wb').write(crypto.dump_certificate(crypto.FILETYPE_PEM, cert))
-open(&quot;private.key&quot;, 'wb').write(crypto.dump_privatekey(crypto.FILETYPE_PEM, k))
+print(domain.expiration_date)
 </code></pre>
-<p>直接使用刚刚生成的证书进行解析，具体注释下脚本输出内容中已有说明。</p>
-<pre><code class="language-python">import OpenSSL
+<p>我们可以打印出所有支持的字段信息，以下是相关输出，根据需求获取即可。</p>
+<pre><code>&gt;&gt;&gt; print(domain.__dict__)
+{
+    'name': 'xwl.io', 
+    'registrar': 'CloudFlare, Inc.', 
+    'registrant_country': 'CN', 
+    'creation_date': datetime.datetime(2021, 1, 30, 15, 54, 49), 
+    'expiration_date': datetime.datetime(2023, 1, 30, 15, 54, 49), 
+    'last_updated': datetime.datetime(2021, 5, 3, 21, 17, 4), 
+    'status': 'clientTransferProhibited https://icann.org/epp#clientTransferProhibited', 
+    'statuses': ['serverTransferProhibited https://icann.org/epp#serverTransferProhibited', 
+    'clientTransferProhibited https://icann.org/epp#clientTransferProhibited'], 'dnssec': False, 
+    'name_servers': {'ashley.ns.cloudflare.com\r', 'earl.ns.cloudflare.com\r'},           'registrant': 'DATA REDACTED'
+}
+</code></pre>
+<h2 id="查询域名证书过期时间">查询域名证书过期时间</h2>
+<p>安装依赖包</p>
+<pre><code class="language-shell">pip install pyopenssl python-dateutil
+</code></pre>
+<p>以下是获取域名证书过期时间的示例脚本</p>
+<pre><code class="language-python">import ssl
 import time
+import OpenSSL
 from dateutil import parser
 
-cert = OpenSSL.crypto.load_certificate(OpenSSL.crypto.FILETYPE_PEM, open(&quot;selfsign.crt&quot;).read())
-certIssue = cert.get_issuer()
+hostname = 'blog.xwl.io'
+port = 443
+cert = ssl.get_server_certificate((hostname, port)).encode()
+cert_obj = OpenSSL.crypto.load_certificate(OpenSSL.crypto.FILETYPE_PEM, cert)
+cert_expire_time = parser.parse(cert.get_notAfter().decode(&quot;UTF-8&quot;)).strftime('%Y-%m-%d %H:%M:%S')
 
-print (&quot;证书版本:            &quot;,cert.get_version() + 1)
-
-print (&quot;证书序列号:          &quot;,hex(cert.get_serial_number()))
-
-print (&quot;证书中使用的签名算法: &quot;,cert.get_signature_algorithm().decode(&quot;UTF-8&quot;))
-
-print (&quot;颁发者:              &quot;,certIssue.commonName)
-
-datetime_struct = parser.parse(cert.get_notBefore().decode(&quot;UTF-8&quot;))
-
-print (&quot;有效期从:             &quot;,datetime_struct.strftime('%Y-%m-%d %H:%M:%S'))
-
-datetime_struct = parser.parse(cert.get_notAfter().decode(&quot;UTF-8&quot;))
-
-print (&quot;到:                   &quot;,datetime_struct.strftime('%Y-%m-%d %H:%M:%S'))
-
-print (&quot;证书是否已经过期:      &quot;,cert.has_expired())
-
-print(&quot;公钥长度&quot; ,cert.get_pubkey().bits())
-
-print(&quot;公钥:\n&quot; ,OpenSSL.crypto.dump_publickey(OpenSSL.crypto.FILETYPE_PEM, cert.get_pubkey()).decode(&quot;utf-8&quot;))
-
-print(&quot;主体信息:&quot;)
-
-print(&quot;CN : 通用名称  OU : 机构单元名称&quot;)
-print(&quot;O  : 机构名    L  : 地理位置&quot;)
-print(&quot;S  : 州/省名   C  : 国名&quot;)
-
-for item in certIssue.get_components():
-    print(item[0].decode(&quot;utf-8&quot;), &quot;  ——  &quot;,item[1].decode(&quot;utf-8&quot;))
-
-print(cert.get_extension_count())
-
-subject = cert.get_subject()
-print(&quot;域名:\n&quot; ，subject.CN)
+print(cert.has_expired())
+print(cert_expire_time)
 </code></pre>
-<p>以上就是我们常用的证书管理的操作，以及获取常用证书信息的方法。</p>
+<p>输出信息如下：</p>
+<pre><code>False
+2022-05-07 23:59:59
+</code></pre>
+<p>由于我的网站挂在CloudFlare下，这个过程中也可能会出现一个错误<br>
+<code>ssl.SSLError: [SSL: SSLV3_ALERT_HANDSHAKE_FAILURE] sslv3 alert handshake failure (_ssl.c:1122)</code></p>
+<p>这是因为请求的时候没有传递主机名导致的，需要修改<code>ssl</code>模块如下</p>
+<pre><code class="language-python">def get_server_certificate(addr, ssl_version=PROTOCOL_TLS, ca_certs=None):
+    &quot;&quot;&quot;Retrieve the certificate from the server at the specified address,
+    and return it as a PEM-encoded string.
+    If 'ca_certs' is specified, validate the server cert against it.
+    If 'ssl_version' is specified, use it in the connection attempt.&quot;&quot;&quot;
+
+    host, port = addr
+    if ca_certs is not None:
+        cert_reqs = CERT_REQUIRED
+    else:
+        cert_reqs = CERT_NONE
+    context = _create_stdlib_context(ssl_version,
+                                     cert_reqs=cert_reqs,
+                                     cafile=ca_certs)
+    with  create_connection(addr) as sock:
+        with context.wrap_socket(sock, server_hostname=host) as sslsock:
+            dercert = sslsock.getpeercert(True)
+    return DER_cert_to_PEM_cert(dercert)
+</code></pre>
+<p>主要就是为这一行<code>with context.wrap_socket(sock, server_hostname=host) as sslsock:</code>，加上<code>server_hostname</code>字段。</p>
 
                         </div>
                         
                             <div class="post-toc">
-                                
+                                <ul class="markdownIt-TOC">
+<li>
+<ul>
+<li><a href="#%E6%9F%A5%E8%AF%A2%E5%9F%9F%E5%90%8D%E8%BF%87%E6%9C%9F%E6%97%B6%E9%97%B4">查询域名过期时间</a></li>
+<li><a href="#%E6%9F%A5%E8%AF%A2%E5%9F%9F%E5%90%8D%E8%AF%81%E4%B9%A6%E8%BF%87%E6%9C%9F%E6%97%B6%E9%97%B4">查询域名证书过期时间</a></li>
+</ul>
+</li>
+</ul>
+
                             </div>
                             
                                 
@@ -337,7 +349,7 @@ print(&quot;域名:\n&quot; ，subject.CN)
 
                                                 <p class="copyright-item">
                                                     <span>&#x94FE;&#x63A5;:</span>
-                                                    <span><a href="https://blog.xwl.io/post/Aqi_GBQPM/">https://blog.xwl.io/post/Aqi_GBQPM/</a></span>
+                                                    <span><a href="https://blog.xwl.io/post/uTLx54AFk/">https://blog.xwl.io/post/uTLx54AFk/</a></span>
                                                 </p>
 
                                                 <p class="copyright-item">
@@ -352,9 +364,9 @@ print(&quot;域名:\n&quot; ，subject.CN)
                                                                     <span style="margin-right:15px">
                         <i class="post-share"></i>
                         <span>&#x5206;&#x4EAB;:</span>
-                                                                    <a title="QR 码" target="_blank" href="https://api.qrserver.com/v1/create-qr-code/?size=150x150&data=https://blog.xwl.io/post/Aqi_GBQPM/"><i class="fa fa-qrcode"></i></a>
-                                                                    <a title="QQ" target="_blank" href="https://sns.qzone.qq.com/cgi-bin/qzshare/cgi_qzshare_onekey?url=https://blog.xwl.io/post/Aqi_GBQPM/&sharesource=qzone&title=Python 证书管理&pics=https://blog.xwl.io/images/avatar.png?v=1621093310638&summary="><i class="fa fa-qq"></i></a>
-                                                                    <a title="新浪微博" target="_blank" href="https://service.weibo.com/share/share.php?url=https://blog.xwl.io/post/Aqi_GBQPM/&sharesource=weibo&title=Python 证书管理 + " - " + &pic="https://blog.xwl.io/images/avatar.png?v=1621093310638 "><i class="fa fa-weibo "></i></a>
+                                                                    <a title="QR 码" target="_blank" href="https://api.qrserver.com/v1/create-qr-code/?size=150x150&data=https://blog.xwl.io/post/uTLx54AFk/"><i class="fa fa-qrcode"></i></a>
+                                                                    <a title="QQ" target="_blank" href="https://sns.qzone.qq.com/cgi-bin/qzshare/cgi_qzshare_onekey?url=https://blog.xwl.io/post/uTLx54AFk/&sharesource=qzone&title=Python 监控域名信息&pics=https://blog.xwl.io/images/avatar.png?v=1621093310638&summary="><i class="fa fa-qq"></i></a>
+                                                                    <a title="新浪微博" target="_blank" href="https://service.weibo.com/share/share.php?url=https://blog.xwl.io/post/uTLx54AFk/&sharesource=weibo&title=Python 监控域名信息 + " - " + &pic="https://blog.xwl.io/images/avatar.png?v=1621093310638 "><i class="fa fa-weibo "></i></a>
 
                                                                     </span>
                                                                     
@@ -384,13 +396,9 @@ print(&quot;域名:\n&quot; ，subject.CN)
                                                                                 <!---->
                                                                                 <section class="post-nav">
                                                                                     
-                                                                                        <a class="prev" rel="prev" href="https://blog.xwl.io/post/9LRClFOn3/">
-                                                                                            Python Vue 部署与联调测试
-                                                                                        </a>
-                                                                                        
                                                                                             
-                                                                                                <a class="next" rel="next" href="https://blog.xwl.io/post/Qc51rd-j-/">
-                                                                                                    使用GitHub Action自动提交网站收录
+                                                                                                <a class="next" rel="next" href="https://blog.xwl.io/post/MiZtYXF53/">
+                                                                                                    职场人如何汇报工作
                                                                                                 </a>
                                                                                                 
                                                                                 </section>

@@ -2,7 +2,7 @@
 <feed xmlns="http://www.w3.org/2005/Atom">
     <id>https://blog.xwl.io</id>
     <title>许大仙的博客</title>
-    <updated>2021-05-14T16:35:45.085Z</updated>
+    <updated>2021-05-15T15:42:21.092Z</updated>
     <generator>https://github.com/jpmonette/feed</generator>
     <link rel="alternate" href="https://blog.xwl.io"/>
     <link rel="self" href="https://blog.xwl.io/atom.xml"/>
@@ -10,6 +10,13 @@
     <logo>https://blog.xwl.io/images/avatar.png</logo>
     <icon>https://blog.xwl.io/favicon.ico</icon>
     <rights>All rights reserved 2021, 许大仙的博客</rights>
+    <entry>
+        <title type="html"><![CDATA[Python 监控域名信息]]></title>
+        <id>https://blog.xwl.io/post/uTLx54AFk/</id>
+        <link href="https://blog.xwl.io/post/uTLx54AFk/">
+        </link>
+        <updated>2021-05-15T14:26:51.000Z</updated>
+    </entry>
     <entry>
         <title type="html"><![CDATA[职场人如何汇报工作]]></title>
         <id>https://blog.xwl.io/post/MiZtYXF53/</id>
