@@ -2,7 +2,7 @@
 <feed xmlns="http://www.w3.org/2005/Atom">
     <id>https://blog.xwl.io</id>
     <title>许大仙的博客</title>
-    <updated>2021-05-15T15:44:32.014Z</updated>
+    <updated>2021-05-17T14:34:11.332Z</updated>
     <generator>https://github.com/jpmonette/feed</generator>
     <link rel="alternate" href="https://blog.xwl.io"/>
     <link rel="self" href="https://blog.xwl.io/atom.xml"/>
@@ -10,6 +10,13 @@
     <logo>https://blog.xwl.io/images/avatar.png</logo>
     <icon>https://blog.xwl.io/favicon.ico</icon>
     <rights>All rights reserved 2021, 许大仙的博客</rights>
+    <entry>
+        <title type="html"><![CDATA[Python Peewee 使用]]></title>
+        <id>https://blog.xwl.io/post/python-peewee/</id>
+        <link href="https://blog.xwl.io/post/python-peewee/">
+        </link>
+        <updated>2021-05-17T13:04:54.000Z</updated>
+    </entry>
     <entry>
         <title type="html"><![CDATA[Python 监控域名信息]]></title>
         <id>https://blog.xwl.io/post/uTLx54AFk/</id>
@@ -142,12 +149,5 @@
         <link href="https://blog.xwl.io/post/sMLLztYXw/">
         </link>
         <updated>2021-04-13T13:51:05.000Z</updated>
-    </entry>
-    <entry>
-        <title type="html"><![CDATA[关于本站服务构建]]></title>
-        <id>https://blog.xwl.io/post/5wRgq8uqf/</id>
-        <link href="https://blog.xwl.io/post/5wRgq8uqf/">
-        </link>
-        <updated>2021-03-31T17:20:49.000Z</updated>
     </entry>
 </feed>
