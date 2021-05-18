@@ -627,11 +627,11 @@
 .post-latest a {
   float: left;
   max-width: 50vw;
-}
-.post-latest span {
   overflow: hidden;
   text-overflow: ellipsis;
   white-space: nowrap;
+}
+.post-latest span {
   font-family: Helvetica Neue;
 }
 
