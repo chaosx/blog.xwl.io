@@ -616,13 +616,23 @@
   border-bottom: 1px solid #F3F3F3;
 }
 .post-latest {
-  width: 40%;
-  text-align: center;
+  width: 40vw;
   margin: 0 auto;
+  margin-top: 2vw;
 }
 .post-latest h3 {
   float: left;
   margin: 0px;
+}
+.post-latest a {
+  float: left;
+  max-width: 50vw;
+}
+.post-latest span {
+  overflow: hidden;
+  text-overflow: ellipsis;
+  white-space: nowrap;
+  font-family: Helvetica Neue;
 }
 
         .en{

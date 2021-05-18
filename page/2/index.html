@@ -276,37 +276,37 @@
                     
                         
                         <article class="archive-item">
-                        <a class="archive-item-link" href="https://blog.xwl.io/post/e5-HJIifG/" style="float: left;">
+                        <a class="archive-item-link" href="https://blog.xwl.io/post/e5-HJIifG/">
                             软件测试快速入门指南
-                        </a><span class="archive-item-date" style="font-family: Helvetica Neue;">2021-05-03</span></article><br>
+                        </a><span class="archive-item-date">2021-05-03</span></article><br>
                         
                     
                         
                         <article class="archive-item">
-                        <a class="archive-item-link" href="https://blog.xwl.io/post/aD6fQ54QO/" style="float: left;">
+                        <a class="archive-item-link" href="https://blog.xwl.io/post/aD6fQ54QO/">
                             关于程序员打造个人品牌
-                        </a><span class="archive-item-date" style="font-family: Helvetica Neue;">2021-05-03</span></article><br>
+                        </a><span class="archive-item-date">2021-05-03</span></article><br>
                         
                     
                         
                         <article class="archive-item">
-                        <a class="archive-item-link" href="https://blog.xwl.io/post/SGNGDyGh1/" style="float: left;">
+                        <a class="archive-item-link" href="https://blog.xwl.io/post/SGNGDyGh1/">
                             Kubernetes容器的启动/删除流程
-                        </a><span class="archive-item-date" style="font-family: Helvetica Neue;">2021-05-02</span></article><br>
+                        </a><span class="archive-item-date">2021-05-02</span></article><br>
                         
                     
                         
                         <article class="archive-item">
-                        <a class="archive-item-link" href="https://blog.xwl.io/post/tgfaCQjnt/" style="float: left;">
+                        <a class="archive-item-link" href="https://blog.xwl.io/post/tgfaCQjnt/">
                             来自长假第一天的挣扎
-                        </a><span class="archive-item-date" style="font-family: Helvetica Neue;">2021-05-02</span></article><br>
+                        </a><span class="archive-item-date">2021-05-02</span></article><br>
                         
                     
                         
                         <article class="archive-item">
-                        <a class="archive-item-link" href="https://blog.xwl.io/post/RlIk8BA71/" style="float: left;">
+                        <a class="archive-item-link" href="https://blog.xwl.io/post/RlIk8BA71/">
                             操作系统的上下文切换
-                        </a><span class="archive-item-date" style="font-family: Helvetica Neue;">2021-04-25</span></article><br>
+                        </a><span class="archive-item-date">2021-04-25</span></article><br>
                         
                     
                         
@@ -328,7 +328,11 @@
 </body>
 <script>
     if(/Android|webOS|iPhone|iPod|BlackBerry/i.test(navigator.userAgent)) {
-        document.getElementsByClassName("post-latest")[0].style.display = "none";
+        var ds = document.getElementsByClassName("archive-item-date");
+        for (let index = 0; index < ds.length; index++) {
+            let element = ds[index];
+            element.style.display = "none";
+        }
     };
     // type 
     var typed = new Typed("#subtitle", {

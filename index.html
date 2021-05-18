@@ -276,37 +276,37 @@
                     
                         
                         <article class="archive-item">
-                        <a class="archive-item-link" href="https://blog.xwl.io/post/sMLLztYXw/" style="float: left;">
+                        <a class="archive-item-link" href="https://blog.xwl.io/post/sMLLztYXw/">
                             别让我们的野心配不上才华｜圈圈@TEDx
-                        </a><span class="archive-item-date" style="font-family: Helvetica Neue;">2021-04-13</span></article><br>
+                        </a><span class="archive-item-date">2021-04-13</span></article><br>
                         
                     
                         
                         <article class="archive-item">
-                        <a class="archive-item-link" href="https://blog.xwl.io/post/python-peewee/" style="float: left;">
+                        <a class="archive-item-link" href="https://blog.xwl.io/post/python-peewee/">
                             Python Peewee 使用
-                        </a><span class="archive-item-date" style="font-family: Helvetica Neue;">2021-05-17</span></article><br>
+                        </a><span class="archive-item-date">2021-05-17</span></article><br>
                         
                     
                         
                         <article class="archive-item">
-                        <a class="archive-item-link" href="https://blog.xwl.io/post/uTLx54AFk/" style="float: left;">
+                        <a class="archive-item-link" href="https://blog.xwl.io/post/uTLx54AFk/">
                             Python 监控域名信息
-                        </a><span class="archive-item-date" style="font-family: Helvetica Neue;">2021-05-15</span></article><br>
+                        </a><span class="archive-item-date">2021-05-15</span></article><br>
                         
                     
                         
                         <article class="archive-item">
-                        <a class="archive-item-link" href="https://blog.xwl.io/post/MiZtYXF53/" style="float: left;">
+                        <a class="archive-item-link" href="https://blog.xwl.io/post/MiZtYXF53/">
                             职场人如何汇报工作
-                        </a><span class="archive-item-date" style="font-family: Helvetica Neue;">2021-05-14</span></article><br>
+                        </a><span class="archive-item-date">2021-05-14</span></article><br>
                         
                     
                         
                         <article class="archive-item">
-                        <a class="archive-item-link" href="https://blog.xwl.io/post/NYZgYN2ak/" style="float: left;">
+                        <a class="archive-item-link" href="https://blog.xwl.io/post/NYZgYN2ak/">
                             Python AES/CBC/PKCS5Padding 加解密
-                        </a><span class="archive-item-date" style="font-family: Helvetica Neue;">2021-05-13</span></article><br>
+                        </a><span class="archive-item-date">2021-05-13</span></article><br>
                         
                     
                         
@@ -328,7 +328,11 @@
 </body>
 <script>
     if(/Android|webOS|iPhone|iPod|BlackBerry/i.test(navigator.userAgent)) {
-        document.getElementsByClassName("post-latest")[0].style.display = "none";
+        var ds = document.getElementsByClassName("archive-item-date");
+        for (let index = 0; index < ds.length; index++) {
+            let element = ds[index];
+            element.style.display = "none";
+        }
     };
     // type 
     var typed = new Typed("#subtitle", {

@@ -276,9 +276,9 @@
                     
                         
                         <article class="archive-item">
-                        <a class="archive-item-link" href="https://blog.xwl.io/post/5wRgq8uqf/" style="float: left;">
+                        <a class="archive-item-link" href="https://blog.xwl.io/post/5wRgq8uqf/">
                             关于本站服务构建
-                        </a><span class="archive-item-date" style="font-family: Helvetica Neue;">2021-04-01</span></article><br>
+                        </a><span class="archive-item-date">2021-04-01</span></article><br>
                         
                     
                 </div>
@@ -290,7 +290,11 @@
 </body>
 <script>
     if(/Android|webOS|iPhone|iPod|BlackBerry/i.test(navigator.userAgent)) {
-        document.getElementsByClassName("post-latest")[0].style.display = "none";
+        var ds = document.getElementsByClassName("archive-item-date");
+        for (let index = 0; index < ds.length; index++) {
+            let element = ds[index];
+            element.style.display = "none";
+        }
     };
     // type 
     var typed = new Typed("#subtitle", {
