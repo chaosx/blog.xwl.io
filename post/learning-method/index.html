@@ -4,7 +4,7 @@
 <head>
     <meta charset="utf-8" />
 <title>
-    使用vscode调试haproxy | 许大仙的博客
+    学习的正确方法 | 许大仙的博客
 </title>
 <!--[if lt IE 9]><script src="//cdn.bootcss.com/html5shiv/r29/html5.js"></script><![endif]-->
 <meta content="width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=0" name="viewport" />
@@ -221,7 +221,7 @@
                     <article class="post-wrap">
                         <header class="post-header">
                             <h1 class="post-title">
-                                使用vscode调试haproxy
+                                学习的正确方法
                             </h1>
                             
                                     <!--zh-->
@@ -230,15 +230,15 @@
                                         <a itemprop="author" rel="author" href="/">
                                             许大仙
                                         </a>
-                                        <span class="post-time">&#x65E5;&#x671F;: <a href="#">2021-04-15</a></span>
+                                        <span class="post-time">&#x65E5;&#x671F;: <a href="#">2021-05-19</a></span>
                                         <span class="post-readtime">&#x9605;&#x8BFB;&#x65F6;&#x95F4;:<a
-                                    href="#">1.4
+                                    href="#">2.2
                                     &#x5206;&#x949F;</a></span>
-                                        <span class="post-words">&#x5B57;&#x6570;:<a href="#">290</a></span>
+                                        <span class="post-words">&#x5B57;&#x6570;:<a href="#">664</a></span>
                                         
                                             <span class="post-category">&#x5206;&#x7C7B;:
                                 
-                                <a href="https://blog.xwl.io/tag/haproxy/">haproxy</a>
+                                <a href="https://blog.xwl.io/tag/personal-growth/">个人成长</a>
                                 
                             </span>
                                                 
@@ -247,58 +247,47 @@
                         </header>
                         
                         <div class="post-content">
-                            <h2 id="基础环境配置">基础环境配置</h2>
-<p>mac环境下，自带的是clang，在编辑haproxy的时候会出现一系列的warning，所以先安装下gcc，haproxy官方测试通过的只有4.x版本</p>
-<pre><code>brew install gcc@4.9
-</code></pre>
-<p>然后修改haproxy的Makefile，120行。</p>
-<pre><code>CC = /usr/local/Cellar/gcc\@4.9/4.9.4_1/bin/gcc-4.9
-</code></pre>
-<p>编译安装</p>
-<pre><code>make TARGET=osx
-make install PREFIX=/opt/haproxy
-</code></pre>
-<h2 id="vscode-配置">vscode 配置</h2>
+                            <p>怎样才能快乐有效地学习？我们要做到三点</p>
 <ul>
-<li>tasks.json</li>
+<li>自己喜欢的东西</li>
+<li>能够学得好、让自己有成就感</li>
+<li>这种学习能给我们带来价值</li>
 </ul>
-<pre><code>{
-    &quot;version&quot;: &quot;2.0.0&quot;,
-    &quot;tasks&quot;: [
-        {
-            &quot;label&quot;: &quot;haproxy&quot;,
-            &quot;type&quot;: &quot;shell&quot;,
-            &quot;command&quot;: &quot;sudo make TARGET=osx &amp;&amp; sudo make install PREFIX=/opt/haproxy &amp;&amp; sudo make clean&quot;,
-            &quot;problemMatcher&quot;: [
-                &quot;$gcc&quot;
-            ]
-        }
-    ]
-}
-</code></pre>
-<p>此时运行任务的时候就自动执行tasks.json的任务，进行编译，完成之后就能顺利调试。</p>
+<p>基于这三点，在学习过程中，需要注意以下四个方面：</p>
+<h2 id="按需学习">按需学习</h2>
+<p>选择对我们有用、与历史过往经历匹配、能让我们参与其中、并能够应用的学习内容。长期有用的东西，需要转化成短期有用；一个大的学习内容，需要拆分出对我们最有用的部分，并集中学习这个部分即可。</p>
+<p>在选择学习内容的时候，我们需要遵循的原则是</p>
+<ol>
+<li>有用：对我们现阶段要有用的，这个用处不一定是工作或者赚钱，也可以是让人放松等等；</li>
+<li>匹配：跟我们的经验背景相匹配的，不会太粗浅，也不会太深奥；</li>
+<li>参与：能够有参与感的，说教式的学习最好不要参与；</li>
+<li>应用：可以应用到行动中去的，跟我们的工作、生活相结合的。</li>
+</ol>
+<figure data-type="image" tabindex="1"><img src="https://blog.xwl.io/post-images/1621354823126.jpg" alt="" loading="lazy"></figure>
+<h2 id="调整心态">调整心态</h2>
+<p>不要试图用意志力坚持学习，而要从学习本身寻求快乐。把诱惑隔离开，渐渐将学习养成习惯。学习一样东西，不需要1万小时， 20小时足矣。</p>
+<h2 id="提升元认知策略">提升元认知策略</h2>
+<p>每个人的认知方式不同，知道自己的认知优劣势，才能够制定适合自己的学习方法。</p>
+<p>总结与反思学习风格，发现自己的优势与劣势，是学习当中，除内容选择外，更需要关注的事情。</p>
+<figure data-type="image" tabindex="2"><img src="https://blog.xwl.io/post-images/1621354881008.jpg" alt="" loading="lazy"></figure>
+<h2 id="正确犯错">正确犯错</h2>
+<p>我们不可能永远不犯错。</p>
+<p>每一次犯错，都是在学习中进步，都是成长的机会。</p>
+<p>每次犯错后如果能够找到原因，并在下次有所进步，那么在犯错中感受到的就是快乐，而非挫败。</p>
+<p>人类的大脑是从犯错中学习的，能否从犯错中进步，决定了犯错这件事获得的是成就感还是挫败感。</p>
+<h2 id="总结">总结</h2>
+<p>学习过程通常有三层：</p>
 <ul>
-<li>launch.json</li>
+<li>知识层：学习某项内容，会某个知识点；</li>
+<li>能力层：超越具体的学习内容，举一反三，应用到解决问题中；</li>
+<li>价值观层：建立整体的心智模型和价值体系。</li>
 </ul>
-<pre><code>{
-    &quot;version&quot;: &quot;0.2.0&quot;,
-    &quot;configurations&quot;: [
-        {
-            &quot;name&quot;: &quot;(gdb) Launch&quot;,
-            &quot;type&quot;: &quot;cppdbg&quot;,
-            &quot;request&quot;: &quot;launch&quot;,
-            &quot;program&quot;: &quot;/opt/haproxy/sbin/haproxy&quot;,
-            &quot;args&quot;: [&quot;-f&quot;, &quot;/opt/haproxy/etc/haproxy.cfg&quot;],
-            &quot;stopAtEntry&quot;: false,
-            &quot;cwd&quot;: &quot;${workspaceFolder}&quot;,
-            &quot;environment&quot;: [],
-            &quot;externalConsole&quot;: false,
-            &quot;MIMode&quot;: &quot;lldb&quot;
-        }
-    ]
-}
-</code></pre>
-<p>这个配置是用于调试环境下的，执行二进制程序环境的命令，以及使用的调试工具gdb/lldb。</p>
+<figure data-type="image" tabindex="3"><img src="https://blog.xwl.io/post-images/1621354994116.jpg" alt="" loading="lazy"></figure>
+<p>知识层次的学习，需要的更多是原理性或资讯类的东西；而能力层次的学习，需要的是程序性或者操作类的东西。</p>
+<p>参考</p>
+<ul>
+<li><a href="https://mp.weixin.qq.com/s/YXBOaKBLOHwSiCsy4oNJDg">靠意志力的学习都是耍流氓</a></li>
+</ul>
 
                         </div>
                         
@@ -306,8 +295,11 @@ make install PREFIX=/opt/haproxy
                                 <ul class="markdownIt-TOC">
 <li>
 <ul>
-<li><a href="#%E5%9F%BA%E7%A1%80%E7%8E%AF%E5%A2%83%E9%85%8D%E7%BD%AE">基础环境配置</a></li>
-<li><a href="#vscode-%E9%85%8D%E7%BD%AE">vscode 配置</a></li>
+<li><a href="#%E6%8C%89%E9%9C%80%E5%AD%A6%E4%B9%A0">按需学习</a></li>
+<li><a href="#%E8%B0%83%E6%95%B4%E5%BF%83%E6%80%81">调整心态</a></li>
+<li><a href="#%E6%8F%90%E5%8D%87%E5%85%83%E8%AE%A4%E7%9F%A5%E7%AD%96%E7%95%A5">提升元认知策略</a></li>
+<li><a href="#%E6%AD%A3%E7%A1%AE%E7%8A%AF%E9%94%99">正确犯错</a></li>
+<li><a href="#%E6%80%BB%E7%BB%93">总结</a></li>
 </ul>
 </li>
 </ul>
@@ -325,7 +317,7 @@ make install PREFIX=/opt/haproxy
 
                                                 <p class="copyright-item">
                                                     <span>&#x94FE;&#x63A5;:</span>
-                                                    <span><a href="https://blog.xwl.io/post/tS0UUUJy6/">https://blog.xwl.io/post/tS0UUUJy6/</a></span>
+                                                    <span><a href="https://blog.xwl.io/post/learning-method/">https://blog.xwl.io/post/learning-method/</a></span>
                                                 </p>
 
                                                 <p class="copyright-item">
@@ -340,9 +332,9 @@ make install PREFIX=/opt/haproxy
                                                                     <span style="margin-right:15px">
                         <i class="post-share"></i>
                         <span>&#x5206;&#x4EAB;:</span>
-                                                                    <a title="QR 码" target="_blank" href="https://api.qrserver.com/v1/create-qr-code/?size=150x150&data=https://blog.xwl.io/post/tS0UUUJy6/"><i class="fa fa-qrcode"></i></a>
-                                                                    <a title="QQ" target="_blank" href="https://sns.qzone.qq.com/cgi-bin/qzshare/cgi_qzshare_onekey?url=https://blog.xwl.io/post/tS0UUUJy6/&sharesource=qzone&title=使用vscode调试haproxy&pics=https://blog.xwl.io/images/avatar.png?v=1621355313216&summary="><i class="fa fa-qq"></i></a>
-                                                                    <a title="新浪微博" target="_blank" href="https://service.weibo.com/share/share.php?url=https://blog.xwl.io/post/tS0UUUJy6/&sharesource=weibo&title=使用vscode调试haproxy + " - " + &pic="https://blog.xwl.io/images/avatar.png?v=1621355313216 "><i class="fa fa-weibo "></i></a>
+                                                                    <a title="QR 码" target="_blank" href="https://api.qrserver.com/v1/create-qr-code/?size=150x150&data=https://blog.xwl.io/post/learning-method/"><i class="fa fa-qrcode"></i></a>
+                                                                    <a title="QQ" target="_blank" href="https://sns.qzone.qq.com/cgi-bin/qzshare/cgi_qzshare_onekey?url=https://blog.xwl.io/post/learning-method/&sharesource=qzone&title=学习的正确方法&pics=https://blog.xwl.io/images/avatar.png?v=1621355313216&summary="><i class="fa fa-qq"></i></a>
+                                                                    <a title="新浪微博" target="_blank" href="https://service.weibo.com/share/share.php?url=https://blog.xwl.io/post/learning-method/&sharesource=weibo&title=学习的正确方法 + " - " + &pic="https://blog.xwl.io/images/avatar.png?v=1621355313216 "><i class="fa fa-weibo "></i></a>
 
                                                                     </span>
                                                                     
@@ -353,8 +345,8 @@ make install PREFIX=/opt/haproxy
                                                                                     <span class="tag ">
                         
                         
-                        <a href="https://blog.xwl.io/tag/haproxy/">#
-                    haproxy
+                        <a href="https://blog.xwl.io/tag/personal-growth/">#
+                    个人成长
                         </a>
                         
                             
@@ -372,13 +364,9 @@ make install PREFIX=/opt/haproxy
                                                                                 <!---->
                                                                                 <section class="post-nav">
                                                                                     
-                                                                                        <a class="prev" rel="prev" href="https://blog.xwl.io/post/s5EVafZW4/">
-                                                                                            haproxy源码阅读（一）主循环流程
-                                                                                        </a>
-                                                                                        
                                                                                             
-                                                                                                <a class="next" rel="next" href="https://blog.xwl.io/post/sMLLztYXw/">
-                                                                                                    别让我们的野心配不上才华｜圈圈@TEDx
+                                                                                                <a class="next" rel="next" href="https://blog.xwl.io/post/python-peewee/">
+                                                                                                    Python Peewee 使用
                                                                                                 </a>
                                                                                                 
                                                                                 </section>
