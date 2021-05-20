@@ -2,7 +2,7 @@
 <feed xmlns="http://www.w3.org/2005/Atom">
     <id>https://blog.xwl.io</id>
     <title>许大仙的博客</title>
-    <updated>2021-05-18T16:50:36.613Z</updated>
+    <updated>2021-05-20T15:45:38.151Z</updated>
     <generator>https://github.com/jpmonette/feed</generator>
     <link rel="alternate" href="https://blog.xwl.io"/>
     <link rel="self" href="https://blog.xwl.io/atom.xml"/>
@@ -10,6 +10,13 @@
     <logo>https://blog.xwl.io/images/avatar.png</logo>
     <icon>https://blog.xwl.io/favicon.ico</icon>
     <rights>All rights reserved 2021, 许大仙的博客</rights>
+    <entry>
+        <title type="html"><![CDATA[OpenResty 中的 Nginx 配置文件详解]]></title>
+        <id>https://blog.xwl.io/post/openresty-nginx-configure/</id>
+        <link href="https://blog.xwl.io/post/openresty-nginx-configure/">
+        </link>
+        <updated>2021-05-20T15:10:37.000Z</updated>
+    </entry>
     <entry>
         <title type="html"><![CDATA[高效学习的正确方法]]></title>
         <id>https://blog.xwl.io/post/learning-method/</id>
@@ -142,12 +149,5 @@
         <link href="https://blog.xwl.io/post/s5EVafZW4/">
         </link>
         <updated>2021-04-15T15:39:58.000Z</updated>
-    </entry>
-    <entry>
-        <title type="html"><![CDATA[使用vscode调试haproxy]]></title>
-        <id>https://blog.xwl.io/post/tS0UUUJy6/</id>
-        <link href="https://blog.xwl.io/post/tS0UUUJy6/">
-        </link>
-        <updated>2021-04-15T15:29:08.000Z</updated>
     </entry>
 </feed>

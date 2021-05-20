@@ -4,7 +4,7 @@
 <head>
     <meta charset="utf-8" />
 <title>
-    使用vscode调试haproxy | 许大仙的博客
+    OpenResty 中的 Nginx 配置文件详解 | 许大仙的博客
 </title>
 <!--[if lt IE 9]><script src="//cdn.bootcss.com/html5shiv/r29/html5.js"></script><![endif]-->
 <meta content="width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=0" name="viewport" />
@@ -221,7 +221,7 @@
                     <article class="post-wrap">
                         <header class="post-header">
                             <h1 class="post-title">
-                                使用vscode调试haproxy
+                                OpenResty 中的 Nginx 配置文件详解
                             </h1>
                             
                                     <!--zh-->
@@ -230,15 +230,15 @@
                                         <a itemprop="author" rel="author" href="/">
                                             许大仙
                                         </a>
-                                        <span class="post-time">&#x65E5;&#x671F;: <a href="#">2021-04-15</a></span>
+                                        <span class="post-time">&#x65E5;&#x671F;: <a href="#">2021-05-20</a></span>
                                         <span class="post-readtime">&#x9605;&#x8BFB;&#x65F6;&#x95F4;:<a
-                                    href="#">1.4
+                                    href="#">2.8
                                     &#x5206;&#x949F;</a></span>
-                                        <span class="post-words">&#x5B57;&#x6570;:<a href="#">290</a></span>
+                                        <span class="post-words">&#x5B57;&#x6570;:<a href="#">761</a></span>
                                         
                                             <span class="post-category">&#x5206;&#x7C7B;:
                                 
-                                <a href="https://blog.xwl.io/tag/haproxy/">haproxy</a>
+                                <a href="https://blog.xwl.io/tag/openresty/">openresty</a>
                                 
                             </span>
                                                 
@@ -247,58 +247,86 @@
                         </header>
                         
                         <div class="post-content">
-                            <h2 id="基础环境配置">基础环境配置</h2>
-<p>mac环境下，自带的是clang，在编辑haproxy的时候会出现一系列的warning，所以先安装下gcc，haproxy官方测试通过的只有4.x版本</p>
-<pre><code>brew install gcc@4.9
-</code></pre>
-<p>然后修改haproxy的Makefile，120行。</p>
-<pre><code>CC = /usr/local/Cellar/gcc\@4.9/4.9.4_1/bin/gcc-4.9
-</code></pre>
-<p>编译安装</p>
-<pre><code>make TARGET=osx
-make install PREFIX=/opt/haproxy
-</code></pre>
-<h2 id="vscode-配置">vscode 配置</h2>
+                            <h2 id="全局配置">全局配置</h2>
 <ul>
-<li>tasks.json</li>
+<li><code>worker_processes auto;</code></li>
 </ul>
-<pre><code>{
-    &quot;version&quot;: &quot;2.0.0&quot;,
-    &quot;tasks&quot;: [
-        {
-            &quot;label&quot;: &quot;haproxy&quot;,
-            &quot;type&quot;: &quot;shell&quot;,
-            &quot;command&quot;: &quot;sudo make TARGET=osx &amp;&amp; sudo make install PREFIX=/opt/haproxy &amp;&amp; sudo make clean&quot;,
-            &quot;problemMatcher&quot;: [
-                &quot;$gcc&quot;
-            ]
+<p>启动工作进程的数量，<code>auto</code>代表服务器有多少核心，就启动多少个进程。</p>
+<ul>
+<li><code>worker_rlimit_nofile 20480</code></li>
+</ul>
+<p>工作进程最大打开的文件数，同Linux概念中的<code>ulimit -n 20480</code></p>
+<ul>
+<li><code>worker_rlimit_core 500M;</code></li>
+</ul>
+<p>表示工作进程所使用的Core文件大小的最大值。</p>
+<p>进程在Crash的时候会产生Core文件，可供后续获取更详细的调试信息。</p>
+<ul>
+<li><code>worker_shutdown_timeout 3;</code></li>
+</ul>
+<p>当安全结束一个工作进程时，会停止对工作进程分配新连接，并等待他处理完当前的任务后再退出，如果设置了超时时间，超时后nginx会强制关闭工作进程的连接。</p>
+<h2 id="event配置">event配置</h2>
+<ul>
+<li><code>accept_mutex off;</code></li>
+</ul>
+<p>这个配置默认是开启的，高并发模式下，关闭它会提升一定的QPS。</p>
+<p>当一个新连接到达时，如果激活了accept_mutex，那么多个Worker将以串行方式来处理，其中有一个Worker会被唤醒，其他的Worker继续保持休眠状态；</p>
+<p>如果没有激活accept_mutex，那么所有的Worker都会被唤醒，不过只有一个Worker能获取新连接，其它的Worker会重新进入休眠状态，这就是<a href="https://en.wikipedia.org/wiki/Thundering_herd_problem">「惊群问题」</a>。</p>
+<p>从系统的层面上来说，也就是进程之间会产生一定数量的上下文切换，但我们的工作进程一般与CPU相关，并不会有特别多的进程，所以建议关闭。</p>
+<p>另外nginx从1.11.3版本之后也增加了对NGX_EXCLUSIVE_EVENT选项的支持，这样就可以避免多worker的epoll出现的惊群效应，从此之后accept_mutex从默认的on变成了默认off。</p>
+<ul>
+<li><code>worker_connections 20480;</code></li>
+</ul>
+<p>这个参数就是工作进程最大支持的连接数，理论上是越多越好，但也会受最大可打开的文件数限制，也就是需要和<code>worker_rlimit_nofile</code>参数保持一致即可。</p>
+<h2 id="http配置">http配置</h2>
+<ul>
+<li><code>server_tokens off;</code></li>
+</ul>
+<p>隐藏nginx版本号。</p>
+<ul>
+<li><code>client_max_body_size 0</code></li>
+</ul>
+<p>设置nginx上传文件的大小，一般会设置为0，也就是不限制。</p>
+<p>后续我们可以在程序中灵活的进行判断。</p>
+<ul>
+<li><code>open_file_cache max=1000 inactive=60;</code></li>
+</ul>
+<p>缓存打开的文件描述符，<code>max</code>指缓存的最大数量，<code>inactive</code>则指缓存文件多久没有活跃则移除，这是一个优化参数。</p>
+<ul>
+<li><code>access_log logs/access.log main buffer=30000 flush=3;</code></li>
+</ul>
+<p>这是一个日志写入优化参数。</p>
+<p>在高并发环境下，每秒都会产生大量的日志，产生一条日志数据就写一条，会产生大量不必要的IO损耗。</p>
+<p><code>buffer</code>指缓存区大小，如果数据超过缓冲区大小的，会把数据写入磁盘。<br>
+<code>flush</code>指间隔多少秒，就写入一次磁盘。</p>
+<p>以上条件满足任何一点，都会产生写入操作。</p>
+<ul>
+<li>上游服务长连接</li>
+</ul>
+<p>让上游服务支持以HTTP1.1协议发送请求，同时支持Keep-alive，也就是所谓的长连接。</p>
+<pre><code>http {
+    upstream backend {
+        server 0.0.0.1;
+        balancer_by_lua_block {
+            edge.balancer_phase()
         }
-    ]
+
+        keepalive 300;
+    }
+
+    server {
+        listen       80;
+        listen       443 ssl;
+
+        location / {
+            set $upstream_connection         '';
+
+            proxy_http_version 1.1;
+            proxy_set_header   Connection        $upstream_connection;
+        }
+    }
 }
 </code></pre>
-<p>此时运行任务的时候就自动执行tasks.json的任务，进行编译，完成之后就能顺利调试。</p>
-<ul>
-<li>launch.json</li>
-</ul>
-<pre><code>{
-    &quot;version&quot;: &quot;0.2.0&quot;,
-    &quot;configurations&quot;: [
-        {
-            &quot;name&quot;: &quot;(gdb) Launch&quot;,
-            &quot;type&quot;: &quot;cppdbg&quot;,
-            &quot;request&quot;: &quot;launch&quot;,
-            &quot;program&quot;: &quot;/opt/haproxy/sbin/haproxy&quot;,
-            &quot;args&quot;: [&quot;-f&quot;, &quot;/opt/haproxy/etc/haproxy.cfg&quot;],
-            &quot;stopAtEntry&quot;: false,
-            &quot;cwd&quot;: &quot;${workspaceFolder}&quot;,
-            &quot;environment&quot;: [],
-            &quot;externalConsole&quot;: false,
-            &quot;MIMode&quot;: &quot;lldb&quot;
-        }
-    ]
-}
-</code></pre>
-<p>这个配置是用于调试环境下的，执行二进制程序环境的命令，以及使用的调试工具gdb/lldb。</p>
 
                         </div>
                         
@@ -306,8 +334,9 @@ make install PREFIX=/opt/haproxy
                                 <ul class="markdownIt-TOC">
 <li>
 <ul>
-<li><a href="#%E5%9F%BA%E7%A1%80%E7%8E%AF%E5%A2%83%E9%85%8D%E7%BD%AE">基础环境配置</a></li>
-<li><a href="#vscode-%E9%85%8D%E7%BD%AE">vscode 配置</a></li>
+<li><a href="#%E5%85%A8%E5%B1%80%E9%85%8D%E7%BD%AE">全局配置</a></li>
+<li><a href="#event%E9%85%8D%E7%BD%AE">event配置</a></li>
+<li><a href="#http%E9%85%8D%E7%BD%AE">http配置</a></li>
 </ul>
 </li>
 </ul>
@@ -325,7 +354,7 @@ make install PREFIX=/opt/haproxy
 
                                                 <p class="copyright-item">
                                                     <span>&#x94FE;&#x63A5;:</span>
-                                                    <span><a href="https://blog.xwl.io/post/tS0UUUJy6/">https://blog.xwl.io/post/tS0UUUJy6/</a></span>
+                                                    <span><a href="https://blog.xwl.io/post/openresty-nginx-configure/">https://blog.xwl.io/post/openresty-nginx-configure/</a></span>
                                                 </p>
 
                                                 <p class="copyright-item">
@@ -340,9 +369,9 @@ make install PREFIX=/opt/haproxy
                                                                     <span style="margin-right:15px">
                         <i class="post-share"></i>
                         <span>&#x5206;&#x4EAB;:</span>
-                                                                    <a title="QR 码" target="_blank" href="https://api.qrserver.com/v1/create-qr-code/?size=150x150&data=https://blog.xwl.io/post/tS0UUUJy6/"><i class="fa fa-qrcode"></i></a>
-                                                                    <a title="QQ" target="_blank" href="https://sns.qzone.qq.com/cgi-bin/qzshare/cgi_qzshare_onekey?url=https://blog.xwl.io/post/tS0UUUJy6/&sharesource=qzone&title=使用vscode调试haproxy&pics=https://blog.xwl.io/images/avatar.png?v=1621525536169&summary="><i class="fa fa-qq"></i></a>
-                                                                    <a title="新浪微博" target="_blank" href="https://service.weibo.com/share/share.php?url=https://blog.xwl.io/post/tS0UUUJy6/&sharesource=weibo&title=使用vscode调试haproxy + " - " + &pic="https://blog.xwl.io/images/avatar.png?v=1621525536169 "><i class="fa fa-weibo "></i></a>
+                                                                    <a title="QR 码" target="_blank" href="https://api.qrserver.com/v1/create-qr-code/?size=150x150&data=https://blog.xwl.io/post/openresty-nginx-configure/"><i class="fa fa-qrcode"></i></a>
+                                                                    <a title="QQ" target="_blank" href="https://sns.qzone.qq.com/cgi-bin/qzshare/cgi_qzshare_onekey?url=https://blog.xwl.io/post/openresty-nginx-configure/&sharesource=qzone&title=OpenResty 中的 Nginx 配置文件详解&pics=https://blog.xwl.io/images/avatar.png?v=1621525536169&summary="><i class="fa fa-qq"></i></a>
+                                                                    <a title="新浪微博" target="_blank" href="https://service.weibo.com/share/share.php?url=https://blog.xwl.io/post/openresty-nginx-configure/&sharesource=weibo&title=OpenResty 中的 Nginx 配置文件详解 + " - " + &pic="https://blog.xwl.io/images/avatar.png?v=1621525536169 "><i class="fa fa-weibo "></i></a>
 
                                                                     </span>
                                                                     
@@ -353,8 +382,8 @@ make install PREFIX=/opt/haproxy
                                                                                     <span class="tag ">
                         
                         
-                        <a href="https://blog.xwl.io/tag/haproxy/">#
-                    haproxy
+                        <a href="https://blog.xwl.io/tag/openresty/">#
+                    openresty
                         </a>
                         
                             
@@ -372,13 +401,9 @@ make install PREFIX=/opt/haproxy
                                                                                 <!---->
                                                                                 <section class="post-nav">
                                                                                     
-                                                                                        <a class="prev" rel="prev" href="https://blog.xwl.io/post/s5EVafZW4/">
-                                                                                            haproxy源码阅读（一）主循环流程
-                                                                                        </a>
-                                                                                        
                                                                                             
-                                                                                                <a class="next" rel="next" href="https://blog.xwl.io/post/sMLLztYXw/">
-                                                                                                    别让我们的野心配不上才华｜圈圈@TEDx
+                                                                                                <a class="next" rel="next" href="https://blog.xwl.io/post/learning-method/">
+                                                                                                    高效学习的正确方法
                                                                                                 </a>
                                                                                                 
                                                                                 </section>
