@@ -28,12 +28,12 @@ jobs:
       - name: update google
         uses: wei/curl@master
         with:
-          args: https://www.google.com/ping?sitemap=https://blog.xwl.io/atom.xml
+          args: https://www.google.com/ping?sitemap=https://xwl.io/atom.xml
 
       - name: update bing
         uses: wei/curl@master
         with:
-          args: http://www.bing.com/webmaster/ping.aspx?sitemap=https://blog.xwl.io/atom.xml
+          args: http://www.bing.com/webmaster/ping.aspx?sitemap=https://xwl.io/atom.xml
          
       - name: update baidu
         uses: actions/setup-python@v2
