@@ -1,152 +1,152 @@
 <?xml version="1.0" encoding="utf-8"?>
 <feed xmlns="http://www.w3.org/2005/Atom">
-    <id>https://blog.xwl.io</id>
+    <id>https://xwl.io</id>
     <title>许大仙的博客</title>
-    <updated>2021-05-20T15:45:38.151Z</updated>
+    <updated>2021-05-22T09:40:50.073Z</updated>
     <generator>https://github.com/jpmonette/feed</generator>
-    <link rel="alternate" href="https://blog.xwl.io"/>
-    <link rel="self" href="https://blog.xwl.io/atom.xml"/>
+    <link rel="alternate" href="https://xwl.io"/>
+    <link rel="self" href="https://xwl.io/atom.xml"/>
     <subtitle>一个运维人的成长历程</subtitle>
-    <logo>https://blog.xwl.io/images/avatar.png</logo>
-    <icon>https://blog.xwl.io/favicon.ico</icon>
+    <logo>https://xwl.io/images/avatar.png</logo>
+    <icon>https://xwl.io/favicon.ico</icon>
     <rights>All rights reserved 2021, 许大仙的博客</rights>
     <entry>
         <title type="html"><![CDATA[OpenResty 中的 Nginx 配置文件详解]]></title>
-        <id>https://blog.xwl.io/post/openresty-nginx-configure/</id>
-        <link href="https://blog.xwl.io/post/openresty-nginx-configure/">
+        <id>https://xwl.io/post/openresty-nginx-configure/</id>
+        <link href="https://xwl.io/post/openresty-nginx-configure/">
         </link>
         <updated>2021-05-20T15:10:37.000Z</updated>
     </entry>
     <entry>
         <title type="html"><![CDATA[高效学习的正确方法]]></title>
-        <id>https://blog.xwl.io/post/learning-method/</id>
-        <link href="https://blog.xwl.io/post/learning-method/">
+        <id>https://xwl.io/post/learning-method/</id>
+        <link href="https://xwl.io/post/learning-method/">
         </link>
         <updated>2021-05-18T16:16:53.000Z</updated>
     </entry>
     <entry>
         <title type="html"><![CDATA[Python Peewee 使用]]></title>
-        <id>https://blog.xwl.io/post/python-peewee/</id>
-        <link href="https://blog.xwl.io/post/python-peewee/">
+        <id>https://xwl.io/post/python-peewee/</id>
+        <link href="https://xwl.io/post/python-peewee/">
         </link>
         <updated>2021-05-17T13:04:54.000Z</updated>
     </entry>
     <entry>
         <title type="html"><![CDATA[Python 监控域名信息]]></title>
-        <id>https://blog.xwl.io/post/uTLx54AFk/</id>
-        <link href="https://blog.xwl.io/post/uTLx54AFk/">
+        <id>https://xwl.io/post/uTLx54AFk/</id>
+        <link href="https://xwl.io/post/uTLx54AFk/">
         </link>
         <updated>2021-05-15T14:26:51.000Z</updated>
     </entry>
     <entry>
         <title type="html"><![CDATA[职场人如何汇报工作]]></title>
-        <id>https://blog.xwl.io/post/MiZtYXF53/</id>
-        <link href="https://blog.xwl.io/post/MiZtYXF53/">
+        <id>https://xwl.io/post/MiZtYXF53/</id>
+        <link href="https://xwl.io/post/MiZtYXF53/">
         </link>
         <updated>2021-05-13T16:55:11.000Z</updated>
     </entry>
     <entry>
         <title type="html"><![CDATA[Python AES/CBC/PKCS5Padding 加解密]]></title>
-        <id>https://blog.xwl.io/post/NYZgYN2ak/</id>
-        <link href="https://blog.xwl.io/post/NYZgYN2ak/">
+        <id>https://xwl.io/post/NYZgYN2ak/</id>
+        <link href="https://xwl.io/post/NYZgYN2ak/">
         </link>
         <updated>2021-05-12T16:00:17.000Z</updated>
     </entry>
     <entry>
         <title type="html"><![CDATA[Python Vue 部署与联调测试]]></title>
-        <id>https://blog.xwl.io/post/9LRClFOn3/</id>
-        <link href="https://blog.xwl.io/post/9LRClFOn3/">
+        <id>https://xwl.io/post/9LRClFOn3/</id>
+        <link href="https://xwl.io/post/9LRClFOn3/">
         </link>
         <updated>2021-05-11T15:49:50.000Z</updated>
     </entry>
     <entry>
         <title type="html"><![CDATA[Python 证书管理]]></title>
-        <id>https://blog.xwl.io/post/Aqi_GBQPM/</id>
-        <link href="https://blog.xwl.io/post/Aqi_GBQPM/">
+        <id>https://xwl.io/post/Aqi_GBQPM/</id>
+        <link href="https://xwl.io/post/Aqi_GBQPM/">
         </link>
         <updated>2021-05-10T16:01:44.000Z</updated>
     </entry>
     <entry>
         <title type="html"><![CDATA[使用GitHub Action自动提交网站收录]]></title>
-        <id>https://blog.xwl.io/post/Qc51rd-j-/</id>
-        <link href="https://blog.xwl.io/post/Qc51rd-j-/">
+        <id>https://xwl.io/post/Qc51rd-j-/</id>
+        <link href="https://xwl.io/post/Qc51rd-j-/">
         </link>
         <updated>2021-05-08T17:36:11.000Z</updated>
     </entry>
     <entry>
         <title type="html"><![CDATA[关于GitLab CI常用策略]]></title>
-        <id>https://blog.xwl.io/post/okYjMtPcs/</id>
-        <link href="https://blog.xwl.io/post/okYjMtPcs/">
+        <id>https://xwl.io/post/okYjMtPcs/</id>
+        <link href="https://xwl.io/post/okYjMtPcs/">
         </link>
         <updated>2021-05-06T16:56:33.000Z</updated>
     </entry>
     <entry>
         <title type="html"><![CDATA[Python 2的中文编码问题]]></title>
-        <id>https://blog.xwl.io/post/Fml9VHfUQ/</id>
-        <link href="https://blog.xwl.io/post/Fml9VHfUQ/">
+        <id>https://xwl.io/post/Fml9VHfUQ/</id>
+        <link href="https://xwl.io/post/Fml9VHfUQ/">
         </link>
         <updated>2021-05-04T16:27:06.000Z</updated>
     </entry>
     <entry>
         <title type="html"><![CDATA[软件测试快速入门指南]]></title>
-        <id>https://blog.xwl.io/post/e5-HJIifG/</id>
-        <link href="https://blog.xwl.io/post/e5-HJIifG/">
+        <id>https://xwl.io/post/e5-HJIifG/</id>
+        <link href="https://xwl.io/post/e5-HJIifG/">
         </link>
         <updated>2021-05-03T07:43:48.000Z</updated>
     </entry>
     <entry>
         <title type="html"><![CDATA[关于程序员打造个人品牌]]></title>
-        <id>https://blog.xwl.io/post/aD6fQ54QO/</id>
-        <link href="https://blog.xwl.io/post/aD6fQ54QO/">
+        <id>https://xwl.io/post/aD6fQ54QO/</id>
+        <link href="https://xwl.io/post/aD6fQ54QO/">
         </link>
         <updated>2021-05-02T16:05:10.000Z</updated>
     </entry>
     <entry>
         <title type="html"><![CDATA[Kubernetes容器的启动/删除流程]]></title>
-        <id>https://blog.xwl.io/post/SGNGDyGh1/</id>
-        <link href="https://blog.xwl.io/post/SGNGDyGh1/">
+        <id>https://xwl.io/post/SGNGDyGh1/</id>
+        <link href="https://xwl.io/post/SGNGDyGh1/">
         </link>
         <updated>2021-05-02T10:03:08.000Z</updated>
     </entry>
     <entry>
         <title type="html"><![CDATA[来自长假第一天的挣扎]]></title>
-        <id>https://blog.xwl.io/post/tgfaCQjnt/</id>
-        <link href="https://blog.xwl.io/post/tgfaCQjnt/">
+        <id>https://xwl.io/post/tgfaCQjnt/</id>
+        <link href="https://xwl.io/post/tgfaCQjnt/">
         </link>
         <updated>2021-05-01T16:05:44.000Z</updated>
     </entry>
     <entry>
         <title type="html"><![CDATA[操作系统的上下文切换]]></title>
-        <id>https://blog.xwl.io/post/RlIk8BA71/</id>
-        <link href="https://blog.xwl.io/post/RlIk8BA71/">
+        <id>https://xwl.io/post/RlIk8BA71/</id>
+        <link href="https://xwl.io/post/RlIk8BA71/">
         </link>
         <updated>2021-04-25T15:49:14.000Z</updated>
     </entry>
     <entry>
         <title type="html"><![CDATA[Kubernetes学习路径 & 教程]]></title>
-        <id>https://blog.xwl.io/post/WpUHlquQY/</id>
-        <link href="https://blog.xwl.io/post/WpUHlquQY/">
+        <id>https://xwl.io/post/WpUHlquQY/</id>
+        <link href="https://xwl.io/post/WpUHlquQY/">
         </link>
         <updated>2021-04-23T16:31:44.000Z</updated>
     </entry>
     <entry>
         <title type="html"><![CDATA[kubernetes基础架构]]></title>
-        <id>https://blog.xwl.io/post/hhkktAeFo/</id>
-        <link href="https://blog.xwl.io/post/hhkktAeFo/">
+        <id>https://xwl.io/post/hhkktAeFo/</id>
+        <link href="https://xwl.io/post/hhkktAeFo/">
         </link>
         <updated>2021-04-22T13:46:29.000Z</updated>
     </entry>
     <entry>
         <title type="html"><![CDATA[haproxy源码阅读（二）处理任务流程]]></title>
-        <id>https://blog.xwl.io/post/TZUaQzhYM/</id>
-        <link href="https://blog.xwl.io/post/TZUaQzhYM/">
+        <id>https://xwl.io/post/TZUaQzhYM/</id>
+        <link href="https://xwl.io/post/TZUaQzhYM/">
         </link>
         <updated>2021-04-16T15:45:38.000Z</updated>
     </entry>
     <entry>
         <title type="html"><![CDATA[haproxy源码阅读（一）主循环流程]]></title>
-        <id>https://blog.xwl.io/post/s5EVafZW4/</id>
-        <link href="https://blog.xwl.io/post/s5EVafZW4/">
+        <id>https://xwl.io/post/s5EVafZW4/</id>
+        <link href="https://xwl.io/post/s5EVafZW4/">
         </link>
         <updated>2021-04-15T15:39:58.000Z</updated>
     </entry>
