@@ -4,7 +4,7 @@
 <head>
     <meta charset="utf-8" />
 <title>
-    高效学习的正确方法 | 许大仙的博客
+    OpenResty Worker间的通讯与缓存 | 许大仙的博客
 </title>
 <!--[if lt IE 9]><script src="//cdn.bootcss.com/html5shiv/r29/html5.js"></script><![endif]-->
 <meta content="width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=0" name="viewport" />
@@ -221,7 +221,7 @@
                     <article class="post-wrap">
                         <header class="post-header">
                             <h1 class="post-title">
-                                高效学习的正确方法
+                                OpenResty Worker间的通讯与缓存
                             </h1>
                             
                                     <!--zh-->
@@ -230,15 +230,15 @@
                                         <a itemprop="author" rel="author" href="/">
                                             许大仙
                                         </a>
-                                        <span class="post-time">&#x65E5;&#x671F;: <a href="#">2021-05-19</a></span>
+                                        <span class="post-time">&#x65E5;&#x671F;: <a href="#">2021-05-25</a></span>
                                         <span class="post-readtime">&#x9605;&#x8BFB;&#x65F6;&#x95F4;:<a
-                                    href="#">2.3
+                                    href="#">4.7
                                     &#x5206;&#x949F;</a></span>
-                                        <span class="post-words">&#x5B57;&#x6570;:<a href="#">688</a></span>
+                                        <span class="post-words">&#x5B57;&#x6570;:<a href="#">1009</a></span>
                                         
                                             <span class="post-category">&#x5206;&#x7C7B;:
                                 
-                                <a href="https://xwl.io/tag/personal-growth/">个人成长</a>
+                                <a href="https://xwl.io/tag/openresty/">openresty</a>
                                 
                             </span>
                                                 
@@ -247,48 +247,167 @@
                         </header>
                         
                         <div class="post-content">
-                            <p>学习需要有一个好的策略，靠意志力学习是的非常痛苦的。</p>
-<p>怎样才能快乐有效地学习？我们要做到三点</p>
-<ul>
-<li>自己喜欢的东西</li>
-<li>能够学得好、让自己有成就感</li>
-<li>这种学习能给我们带来价值</li>
-</ul>
-<p>基于这三点，在学习过程中，需要注意以下四个方面：</p>
-<h2 id="按需学习">按需学习</h2>
-<p>选择对我们有用、与历史过往经历匹配、能让我们参与其中、并能够应用的学习内容。长期有用的东西，需要转化成短期有用；一个大的学习内容，需要拆分出对我们最有用的部分，并集中学习这个部分即可。</p>
-<p>在选择学习内容的时候，我们需要遵循的原则是</p>
-<ol>
-<li>有用：对我们现阶段要有用的，这个用处不一定是工作或者赚钱，也可以是让人放松等等；</li>
-<li>匹配：跟我们的经验背景相匹配的，不会太粗浅，也不会太深奥；</li>
-<li>参与：能够有参与感的，说教式的学习最好不要参与；</li>
-<li>应用：可以应用到行动中去的，跟我们的工作、生活相结合的。</li>
-</ol>
-<figure data-type="image" tabindex="1"><img src="https://xwl.io/post-images/1621354823126.jpg" alt="" loading="lazy"></figure>
-<h2 id="调整心态">调整心态</h2>
-<p>不要试图用意志力坚持学习，而要从学习本身寻求快乐。把诱惑隔离开，渐渐将学习养成习惯。学习一样东西，不需要1万小时， 20小时足矣。</p>
-<h2 id="提升元认知策略">提升元认知策略</h2>
-<p>每个人的认知方式不同，知道自己的认知优劣势，才能够制定适合自己的学习方法。</p>
-<p>总结与反思学习风格，发现自己的优势与劣势，是学习当中，除内容选择外，更需要关注的事情。</p>
-<figure data-type="image" tabindex="2"><img src="https://xwl.io/post-images/1621355418500.jpg" alt="" loading="lazy"></figure>
-<h2 id="正确犯错">正确犯错</h2>
-<p>我们不可能永远不犯错。</p>
-<p>每一次犯错，都是在学习中进步，都是成长的机会。</p>
-<p>每次犯错后如果能够找到原因，并在下次有所进步，那么在犯错中感受到的就是快乐，而非挫败。</p>
-<p>人类的大脑是从犯错中学习的，能否从犯错中进步，决定了犯错这件事获得的是成就感还是挫败感。</p>
-<h2 id="总结">总结</h2>
-<p>学习过程通常有三层：</p>
-<ul>
-<li>知识层：学习某项内容，会某个知识点；</li>
-<li>能力层：超越具体的学习内容，举一反三，应用到解决问题中；</li>
-<li>价值观层：建立整体的心智模型和价值体系。</li>
-</ul>
-<figure data-type="image" tabindex="3"><img src="https://xwl.io/post-images/1621354994116.jpg" alt="" loading="lazy"></figure>
-<p>知识层次的学习，需要的更多是原理性或资讯类的东西；而能力层次的学习，需要的是程序性或者操作类的东西。</p>
-<p>参考</p>
-<ul>
-<li><a href="https://mp.weixin.qq.com/s/YXBOaKBLOHwSiCsy4oNJDg">靠意志力的学习都是耍流氓</a></li>
-</ul>
+                            <h2 id="简介">简介</h2>
+<p>OpenResty对于进程间的通讯，提供了共享内存的机制，也就是名为<code>ngx.shared</code>的方法。</p>
+<p>我们会基于它去进行封装，更多的应用场景也是用于缓存。</p>
+<p>通常情况，我们会用成熟的组件<a href="https://github.com/thibaultcha/lua-resty-mlcache">lua-resty-mlcache</a>做多级缓存。</p>
+<p>它的架构如下：</p>
+<figure data-type="image" tabindex="1"><img src="https://xwl.io/post-images/1621874492443.jpg" alt="" loading="lazy"></figure>
+<p>缓存有两个原则</p>
+<p>一是越靠近用户的请求越好，比如能用本地缓存的就不要发送HTTP请求，能用CDN缓存的就不要打到web服务器，能用nginx缓存的就不要用数据库的缓存。</p>
+<p>二是尽量使用本进程和本机的缓存解决，因为跨了进程和机器甚至机房，缓存的网络开销就会非常大，在高并发的时候会非常明显。</p>
+<p>我们直接贴一下官方的示例</p>
+<pre><code># nginx.conf
+
+http {
+    lua_package_path &quot;/path/to/lua-resty-mlcache/lib/?.lua;;&quot;;
+
+    lua_shared_dict cache_dict 1m;
+
+    init_by_lua_block {
+        local mlcache = require &quot;resty.mlcache&quot;
+
+        local cache, err = mlcache.new(&quot;my_cache&quot;, &quot;cache_dict&quot;, {
+            lru_size = 500,    -- size of the L1 (Lua VM) cache
+            ttl      = 3600,   -- 1h ttl for hits
+            neg_ttl  = 30,     -- 30s ttl for misses
+        })
+        if err then
+
+        end
+
+        _G.cache = cache
+    }
+
+    server {
+        listen 8080;
+
+        location / {
+            content_by_lua_block {
+                local function callback(username)
+                    return db:get_user(username) -- { name = &quot;John Doe&quot;, email = &quot;john@example.com&quot; }
+                end
+
+                local user, err = cache:get(&quot;my_key&quot;, nil, callback, &quot;John Doe&quot;)
+
+                ngx.say(user.username) -- &quot;John Doe&quot;
+            }
+        }
+    }
+}
+</code></pre>
+<p>以上的示例很好了描述了整个程序运行的逻辑，在<code>init</code>阶段初始化缓存，然后用<code>_G</code>变量赋予全局变量，在使用阶段<code>cache:get</code>获取指定Key的缓存，缓存未命中就会调用L3，也就是callback方法。</p>
+<h2 id="缓存风暴问题">缓存风暴问题</h2>
+<p>但这个示例中缺失了<a href="https://github.com/openresty/lua-resty-lock">lua-resty-lock</a>这个组件的调用，为了防止在L3阶段发现缓存风暴，所有带把锁非常有必要。</p>
+<p>我们将局部配置修改如下：</p>
+<pre><code>lua_shared_dict cache_dict 1m;
+lua_shared_dict cache_lock 1m;
+
+init_by_lua_block {
+    local mlcache = require &quot;resty.mlcache&quot;
+
+    local cache, err = mlcache.new(&quot;my_cache&quot;, &quot;cache_dict&quot;, {
+        lru_size = 500,    -- size of the L1 (Lua VM) cache
+        ttl      = 3600,   -- 1h ttl for hits
+        neg_ttl  = 30,     -- 30s ttl for misses
+        shm_locks = &quot;cache_lock&quot;,
+        resty_lock_opts = {
+            exptime = 10,
+            timeout = 5
+        }
+    })
+    if err then
+
+    end
+}
+</code></pre>
+<h2 id="进程之间通讯问题">进程之间通讯问题</h2>
+<p>这个问题我们使用<a href="https://github.com/Kong/lua-resty-worker-events">lua-resty-worker-events</a>模块解决。</p>
+<p>此模块提供了一种向Nginx服务器中的其他工作进程发送事件的方法。通信是通过一个共享的存储区进行的，事件数据将存储在该存储区中。</p>
+<p>结合我们之前的缓存使用场景，在一个Worker中的缓存更新之后，要通知其他Worker也同步更新，它就发挥作用了。</p>
+<p>我们看以下官方提供的示例</p>
+<pre><code>lua_shared_dict process_events 1m;
+
+init_worker_by_lua_block {
+    local ev = require &quot;resty.worker.events&quot;
+
+    local handler = function(data, event, source, pid)
+        print(&quot;received event; source=&quot;,source,
+                &quot;, event=&quot;,event,
+                &quot;, data=&quot;, tostring(data),
+                &quot;, from process &quot;,pid)
+    end
+
+    ev.register(handler)
+
+    local ok, err = ev.configure {
+        shm = &quot;process_events&quot;, -- defined by &quot;lua_shared_dict&quot;
+        timeout = 2,            -- life time of unique event data in shm
+        interval = 1,           -- poll interval (seconds)
+
+        wait_interval = 0.010,  -- wait before retry fetching event data
+        wait_max = 0.5,         -- max wait time before discarding event
+        shm_retries = 999,      -- retries for shm fragmentation (no memory)
+    }
+    if not ok then
+        ngx.log(ngx.ERR, &quot;failed to start event system: &quot;, err)
+        return
+    end
+}
+</code></pre>
+<p>在<code>init_worker_by_lua_block</code>阶段初始化，是因为它需要在每个Worker中都运行，便于同步到其他进程，其他的就是一些配置参数问题。</p>
+<p>下面我们把它结合上面的缓存模块一起使用。</p>
+<p>lua-resty-mlcache提供了ipc接口来支持lua-resty-worker-events模块，我们直接配置参数即可。</p>
+<pre><code>lua_shared_dict cache_dict    1m;
+lua_shared_dict cache_lock    1m;
+lua_shared_dict worker_events 1m;
+
+init_worker_by_lua_block {
+    local mlcache = require &quot;resty.mlcache&quot;
+    local worker_events = require &quot;resty.worker.events&quot;
+
+    local ok, err = worker_events.configure {
+        shm = &quot;worker_events&quot;, 
+        timeout = 2,           
+        interval = 1,    
+
+        wait_interval = 0.010, 
+        wait_max = 0.5,  
+        shm_retries = 999,  
+    }
+
+    local cache, err = mlcache.new(&quot;my_cache&quot;, &quot;cache_dict&quot;, {
+        lru_size = 500,    -- size of the L1 (Lua VM) cache
+        ttl      = 3600,   -- 1h ttl for hits
+        neg_ttl  = 30,     -- 30s ttl for misses
+        shm_locks = &quot;cache_lock&quot;,
+        resty_lock_opts = {
+            exptime = 10,
+            timeout = 5
+        },
+        ipc = {
+            register_listeners = function(events)
+                for _, event_t in pairs(events) do
+                    worker_events.register(
+                        function(data)
+                            event_t.handler(data)
+                        end,
+                        channel_name,
+                        event_t.channel
+                    )
+                end
+            end,
+            broadcast = function(channel, data)
+                worker_events.post(channel_name, channel, data)
+            end
+        }
+    })
+    if err then
+
+    end
+}
+</code></pre>
+<p>以上ipc部分代码截取自Kong项目，有兴趣也可以去参考一下它的设计模式。</p>
 
                         </div>
                         
@@ -296,11 +415,9 @@
                                 <ul class="markdownIt-TOC">
 <li>
 <ul>
-<li><a href="#%E6%8C%89%E9%9C%80%E5%AD%A6%E4%B9%A0">按需学习</a></li>
-<li><a href="#%E8%B0%83%E6%95%B4%E5%BF%83%E6%80%81">调整心态</a></li>
-<li><a href="#%E6%8F%90%E5%8D%87%E5%85%83%E8%AE%A4%E7%9F%A5%E7%AD%96%E7%95%A5">提升元认知策略</a></li>
-<li><a href="#%E6%AD%A3%E7%A1%AE%E7%8A%AF%E9%94%99">正确犯错</a></li>
-<li><a href="#%E6%80%BB%E7%BB%93">总结</a></li>
+<li><a href="#%E7%AE%80%E4%BB%8B">简介</a></li>
+<li><a href="#%E7%BC%93%E5%AD%98%E9%A3%8E%E6%9A%B4%E9%97%AE%E9%A2%98">缓存风暴问题</a></li>
+<li><a href="#%E8%BF%9B%E7%A8%8B%E4%B9%8B%E9%97%B4%E9%80%9A%E8%AE%AF%E9%97%AE%E9%A2%98">进程之间通讯问题</a></li>
 </ul>
 </li>
 </ul>
@@ -318,7 +435,7 @@
 
                                                 <p class="copyright-item">
                                                     <span>&#x94FE;&#x63A5;:</span>
-                                                    <span><a href="https://xwl.io/post/learning-method/">https://xwl.io/post/learning-method/</a></span>
+                                                    <span><a href="https://xwl.io/post/openresty-worker-communication/">https://xwl.io/post/openresty-worker-communication/</a></span>
                                                 </p>
 
                                                 <p class="copyright-item">
@@ -333,9 +450,9 @@
                                                                     <span style="margin-right:15px">
                         <i class="post-share"></i>
                         <span>&#x5206;&#x4EAB;:</span>
-                                                                    <a title="QR 码" target="_blank" href="https://api.qrserver.com/v1/create-qr-code/?size=150x150&data=https://xwl.io/post/learning-method/"><i class="fa fa-qrcode"></i></a>
-                                                                    <a title="QQ" target="_blank" href="https://sns.qzone.qq.com/cgi-bin/qzshare/cgi_qzshare_onekey?url=https://xwl.io/post/learning-method/&sharesource=qzone&title=高效学习的正确方法&pics=https://xwl.io/images/avatar.png?v=1621877055763&summary="><i class="fa fa-qq"></i></a>
-                                                                    <a title="新浪微博" target="_blank" href="https://service.weibo.com/share/share.php?url=https://xwl.io/post/learning-method/&sharesource=weibo&title=高效学习的正确方法 + " - " + &pic="https://xwl.io/images/avatar.png?v=1621877055763 "><i class="fa fa-weibo "></i></a>
+                                                                    <a title="QR 码" target="_blank" href="https://api.qrserver.com/v1/create-qr-code/?size=150x150&data=https://xwl.io/post/openresty-worker-communication/"><i class="fa fa-qrcode"></i></a>
+                                                                    <a title="QQ" target="_blank" href="https://sns.qzone.qq.com/cgi-bin/qzshare/cgi_qzshare_onekey?url=https://xwl.io/post/openresty-worker-communication/&sharesource=qzone&title=OpenResty Worker间的通讯与缓存&pics=https://xwl.io/images/avatar.png?v=1621877055763&summary="><i class="fa fa-qq"></i></a>
+                                                                    <a title="新浪微博" target="_blank" href="https://service.weibo.com/share/share.php?url=https://xwl.io/post/openresty-worker-communication/&sharesource=weibo&title=OpenResty Worker间的通讯与缓存 + " - " + &pic="https://xwl.io/images/avatar.png?v=1621877055763 "><i class="fa fa-weibo "></i></a>
 
                                                                     </span>
                                                                     
@@ -346,8 +463,8 @@
                                                                                     <span class="tag ">
                         
                         
-                        <a href="https://xwl.io/tag/personal-growth/">#
-                    个人成长
+                        <a href="https://xwl.io/tag/openresty/">#
+                    openresty
                         </a>
                         
                             
@@ -365,13 +482,9 @@
                                                                                 <!---->
                                                                                 <section class="post-nav">
                                                                                     
-                                                                                        <a class="prev" rel="prev" href="https://xwl.io/post/openresty-nginx-configure/">
-                                                                                            OpenResty 中的 Nginx 配置文件详解
-                                                                                        </a>
-                                                                                        
                                                                                             
-                                                                                                <a class="next" rel="next" href="https://xwl.io/post/python-peewee/">
-                                                                                                    Python Peewee 使用
+                                                                                                <a class="next" rel="next" href="https://xwl.io/post/openresty-nginx-configure/">
+                                                                                                    OpenResty 中的 Nginx 配置文件详解
                                                                                                 </a>
                                                                                                 
                                                                                 </section>
