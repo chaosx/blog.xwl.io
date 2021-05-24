@@ -96,7 +96,7 @@
                         <input id="switch_default" type="checkbox" class="switch_default">
                         <label for="switch_default" class="toggleBtn"></label>
             </div>
-            <form id="gridea-search-form" data-update="1621878418107" action="/search/index.html">
+            <form id="gridea-search-form" data-update="1621878821859" action="/search/index.html">
                 <input class="search-input" autocomplete="off" spellcheck="false" name="q" autofocus="true" placeholder="Search...">
             </form>
         </div>
@@ -115,7 +115,7 @@
                     <!--zh-->
                     <a id="mobile-toggle-theme-zh" class="a zh">&nbsp;&#x6697;&#x9ED1;</a>
                 </div>
-                <form id="gridea-search-form" data-update="1621878418107" action="/search/index.html">
+                <form id="gridea-search-form" data-update="1621878821859" action="/search/index.html">
                     <input class="search-input" autocomplete="off" spellcheck="false" name="q" autofocus="true" placeholder="Search...">
                 </form>
                 <!--en-->
@@ -232,9 +232,9 @@
                                         </a>
                                         <span class="post-time">&#x65E5;&#x671F;: <a href="#">2021-05-25</a></span>
                                         <span class="post-readtime">&#x9605;&#x8BFB;&#x65F6;&#x95F4;:<a
-                                    href="#">4.8
+                                    href="#">4.9
                                     &#x5206;&#x949F;</a></span>
-                                        <span class="post-words">&#x5B57;&#x6570;:<a href="#">1066</a></span>
+                                        <span class="post-words">&#x5B57;&#x6570;:<a href="#">1071</a></span>
                                         
                                             <span class="post-category">&#x5206;&#x7C7B;:
                                 
@@ -300,7 +300,7 @@ http {
 </code></pre>
 <p>以上的示例很好了描述了整个程序运行的逻辑，在<code>init</code>阶段初始化缓存，然后用<code>_G</code>变量赋予全局变量，在使用阶段<code>cache:get</code>获取指定Key的缓存，缓存未命中就会调用L3，也就是callback方法。</p>
 <h2 id="缓存风暴问题">缓存风暴问题</h2>
-<p>但这个示例中缺失了<a href="https://github.com/openresty/lua-resty-lock">lua-resty-lock</a>这个组件的调用，为了防止在L3阶段发现缓存风暴，所有带把锁非常有必要。</p>
+<p>但这个示例中缺失了<a href="https://github.com/openresty/lua-resty-lock">lua-resty-lock</a>这个组件的调用，为了防止在L3阶段发生缓存失效风暴，所有利用好锁的机制非常重要。</p>
 <p>我们将局部配置修改如下：</p>
 <pre><code>lua_shared_dict cache_dict 1m;
 lua_shared_dict cache_lock 1m;
@@ -454,8 +454,8 @@ init_worker_by_lua_block {
                         <i class="post-share"></i>
                         <span>&#x5206;&#x4EAB;:</span>
                                                                     <a title="QR 码" target="_blank" href="https://api.qrserver.com/v1/create-qr-code/?size=150x150&data=https://xwl.io/post/openresty-cache/"><i class="fa fa-qrcode"></i></a>
-                                                                    <a title="QQ" target="_blank" href="https://sns.qzone.qq.com/cgi-bin/qzshare/cgi_qzshare_onekey?url=https://xwl.io/post/openresty-cache/&sharesource=qzone&title=OpenResty Worker缓存&pics=https://xwl.io/images/avatar.png?v=1621878418107&summary="><i class="fa fa-qq"></i></a>
-                                                                    <a title="新浪微博" target="_blank" href="https://service.weibo.com/share/share.php?url=https://xwl.io/post/openresty-cache/&sharesource=weibo&title=OpenResty Worker缓存 + " - " + &pic="https://xwl.io/images/avatar.png?v=1621878418107 "><i class="fa fa-weibo "></i></a>
+                                                                    <a title="QQ" target="_blank" href="https://sns.qzone.qq.com/cgi-bin/qzshare/cgi_qzshare_onekey?url=https://xwl.io/post/openresty-cache/&sharesource=qzone&title=OpenResty Worker缓存&pics=https://xwl.io/images/avatar.png?v=1621878821859&summary="><i class="fa fa-qq"></i></a>
+                                                                    <a title="新浪微博" target="_blank" href="https://service.weibo.com/share/share.php?url=https://xwl.io/post/openresty-cache/&sharesource=weibo&title=OpenResty Worker缓存 + " - " + &pic="https://xwl.io/images/avatar.png?v=1621878821859 "><i class="fa fa-weibo "></i></a>
 
                                                                     </span>
                                                                     
@@ -550,7 +550,7 @@ init_worker_by_lua_block {
     console.clear();
     
     var newDate = new Date();
-    newDate.setTime(1621878418107);
+    newDate.setTime(1621878821859);
     console.log(" Blog Update Time: " + newDate.toLocaleDateString());
 </script>
         </div>
