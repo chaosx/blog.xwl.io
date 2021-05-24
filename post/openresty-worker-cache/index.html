@@ -4,7 +4,7 @@
 <head>
     <meta charset="utf-8" />
 <title>
-    Kubernetes学习路径 &amp; 教程 | 许大仙的博客
+    OpenResty Worker缓存 | 许大仙的博客
 </title>
 <!--[if lt IE 9]><script src="//cdn.bootcss.com/html5shiv/r29/html5.js"></script><![endif]-->
 <meta content="width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=0" name="viewport" />
@@ -221,7 +221,7 @@
                     <article class="post-wrap">
                         <header class="post-header">
                             <h1 class="post-title">
-                                Kubernetes学习路径 &amp; 教程
+                                OpenResty Worker缓存
                             </h1>
                             
                                     <!--zh-->
@@ -230,15 +230,15 @@
                                         <a itemprop="author" rel="author" href="/">
                                             许大仙
                                         </a>
-                                        <span class="post-time">&#x65E5;&#x671F;: <a href="#">2021-04-24</a></span>
+                                        <span class="post-time">&#x65E5;&#x671F;: <a href="#">2021-05-25</a></span>
                                         <span class="post-readtime">&#x9605;&#x8BFB;&#x65F6;&#x95F4;:<a
-                                    href="#">0.6
+                                    href="#">4.9
                                     &#x5206;&#x949F;</a></span>
-                                        <span class="post-words">&#x5B57;&#x6570;:<a href="#">178</a></span>
+                                        <span class="post-words">&#x5B57;&#x6570;:<a href="#">1071</a></span>
                                         
                                             <span class="post-category">&#x5206;&#x7C7B;:
                                 
-                                <a href="https://xwl.io/tag/kubernetes/">kubernetes</a>
+                                <a href="https://xwl.io/tag/openresty/">openresty</a>
                                 
                             </span>
                                                 
@@ -247,23 +247,169 @@
                         </header>
                         
                         <div class="post-content">
-                            <p>本文学习路径抄录了该项目大量文字 <a href="https://github.com/caicloud/kube-ladder">kube-ladder</a>，相关知识会慢慢补齐。</p>
-<h2 id="入门篇">入门篇</h2>
-<ul>
-<li>Kubernetes 的背景和优势</li>
-<li>Kubernetes 环境的安装部署</li>
-<li>Kubernetes 常用资源的使用方法</li>
-</ul>
-<p>包括不限于Node、Pod、Service、Deployment、Namespace、ConfigMap、Secret。</p>
-<h2 id="原理篇">原理篇</h2>
-<p>目标是了解Kubernetes的架构的核心组成部分，及其工作原理，容器从启动到结束整个生命周期的过程。</p>
-<ul>
-<li><a href="/post/hhkktAeFo/">Kubernetes 的基础架构</a></li>
-<li><a href="/post/SGNGDyGh1/">Kubernetes 容器调度的基本流程</a></li>
-</ul>
-<p>运维人员基本做到这一步就可以了，下面的内容将会涉及到开发。</p>
-<h2 id="集成篇">集成篇</h2>
-<p>本节的目标是使用apiserver相关的接口，用于外部的服务集成。</p>
+                            <h2 id="简介">简介</h2>
+<p>OpenResty对于进程间的通讯，提供了共享内存的机制，也就是名为<code>ngx.shared</code>的方法。</p>
+<p>我们会基于它去进行封装，更多的应用场景也是用于缓存。</p>
+<p>缓存有两个原则</p>
+<p>一是越靠近用户的请求越好，比如能用本地缓存的就不要发送HTTP请求，能用CDN缓存的就不要打到web服务器，能用nginx缓存的就不要用数据库的缓存。</p>
+<p>二是尽量使用本进程和本机的缓存解决，因为跨了进程和机器甚至机房，缓存的网络开销就会非常大，在高并发的时候会非常明显。</p>
+<p>根据以上原则，会优先使用进程内的缓存，OpenResty提供了一个进程缓存模块<a href="https://github.com/openresty/lua-resty-lrucache">lua-resty-lrucache</a>，会把共享内存作为二级缓存。</p>
+<h2 id="缓存模块">缓存模块</h2>
+<p>通常情况，我们会用成熟的组件<a href="https://github.com/thibaultcha/lua-resty-mlcache">lua-resty-mlcache</a>做多级缓存，它提供了三级缓存机制。</p>
+<p>它的架构如下：</p>
+<figure data-type="image" tabindex="1"><img src="https://xwl.io/post-images/1621874492443.jpg" alt="" loading="lazy"></figure>
+<p>我们直接贴一下官方的示例</p>
+<pre><code># nginx.conf
+
+http {
+    lua_package_path &quot;/path/to/lua-resty-mlcache/lib/?.lua;;&quot;;
+
+    lua_shared_dict cache_dict 1m;
+
+    init_by_lua_block {
+        local mlcache = require &quot;resty.mlcache&quot;
+
+        local cache, err = mlcache.new(&quot;my_cache&quot;, &quot;cache_dict&quot;, {
+            lru_size = 500,    -- size of the L1 (Lua VM) cache
+            ttl      = 3600,   -- 1h ttl for hits
+            neg_ttl  = 30,     -- 30s ttl for misses
+        })
+        if err then
+
+        end
+
+        _G.cache = cache
+    }
+
+    server {
+        listen 8080;
+
+        location / {
+            content_by_lua_block {
+                local function callback(username)
+                    return db:get_user(username) -- { name = &quot;John Doe&quot;, email = &quot;john@example.com&quot; }
+                end
+
+                local user, err = cache:get(&quot;my_key&quot;, nil, callback, &quot;John Doe&quot;)
+
+                ngx.say(user.username) -- &quot;John Doe&quot;
+            }
+        }
+    }
+}
+</code></pre>
+<p>以上的示例很好了描述了整个程序运行的逻辑，在<code>init</code>阶段初始化缓存，然后用<code>_G</code>变量赋予全局变量，在使用阶段<code>cache:get</code>获取指定Key的缓存，缓存未命中就会调用L3，也就是callback方法。</p>
+<h2 id="缓存风暴问题">缓存风暴问题</h2>
+<p>但这个示例中缺失了<a href="https://github.com/openresty/lua-resty-lock">lua-resty-lock</a>这个组件的调用，为了防止在L3阶段发生缓存失效风暴，所有利用好锁的机制非常重要。</p>
+<p>我们将局部配置修改如下：</p>
+<pre><code>lua_shared_dict cache_dict 1m;
+lua_shared_dict cache_lock 1m;
+
+init_by_lua_block {
+    local mlcache = require &quot;resty.mlcache&quot;
+
+    local cache, err = mlcache.new(&quot;my_cache&quot;, &quot;cache_dict&quot;, {
+        lru_size = 500,    -- size of the L1 (Lua VM) cache
+        ttl      = 3600,   -- 1h ttl for hits
+        neg_ttl  = 30,     -- 30s ttl for misses
+        shm_locks = &quot;cache_lock&quot;,
+        resty_lock_opts = {
+            exptime = 10,
+            timeout = 5
+        }
+    })
+    if err then
+
+    end
+}
+</code></pre>
+<h2 id="进程之间数据同步">进程之间数据同步</h2>
+<p>这个问题我们使用<a href="https://github.com/Kong/lua-resty-worker-events">lua-resty-worker-events</a>模块解决。</p>
+<p>此模块提供了一种向Nginx服务器中的其他工作进程发送事件的方法。通信是通过一个共享的存储区进行的，事件数据将存储在该存储区中。</p>
+<p>结合我们之前的缓存使用场景，在一个Worker中的缓存更新之后，要通知其他Worker也同步更新，它就发挥作用了。</p>
+<p>我们看以下官方提供的示例</p>
+<pre><code>lua_shared_dict process_events 1m;
+
+init_worker_by_lua_block {
+    local ev = require &quot;resty.worker.events&quot;
+
+    local handler = function(data, event, source, pid)
+        print(&quot;received event; source=&quot;,source,
+                &quot;, event=&quot;,event,
+                &quot;, data=&quot;, tostring(data),
+                &quot;, from process &quot;,pid)
+    end
+
+    ev.register(handler)
+
+    local ok, err = ev.configure {
+        shm = &quot;process_events&quot;, -- defined by &quot;lua_shared_dict&quot;
+        timeout = 2,            -- life time of unique event data in shm
+        interval = 1,           -- poll interval (seconds)
+
+        wait_interval = 0.010,  -- wait before retry fetching event data
+        wait_max = 0.5,         -- max wait time before discarding event
+        shm_retries = 999,      -- retries for shm fragmentation (no memory)
+    }
+    if not ok then
+        ngx.log(ngx.ERR, &quot;failed to start event system: &quot;, err)
+        return
+    end
+}
+</code></pre>
+<p>在<code>init_worker_by_lua_block</code>阶段初始化，是因为它需要在每个Worker中都运行，便于同步到其他进程，其他的就是一些配置参数问题。</p>
+<p>下面我们把它结合上面的缓存模块一起使用。</p>
+<p>lua-resty-mlcache提供了ipc接口来支持lua-resty-worker-events模块，我们直接配置参数即可。</p>
+<pre><code>lua_shared_dict cache_dict    1m;
+lua_shared_dict cache_lock    1m;
+lua_shared_dict worker_events 1m;
+
+init_worker_by_lua_block {
+    local mlcache = require &quot;resty.mlcache&quot;
+    local worker_events = require &quot;resty.worker.events&quot;
+
+    local ok, err = worker_events.configure {
+        shm = &quot;worker_events&quot;, 
+        timeout = 2,           
+        interval = 1,    
+
+        wait_interval = 0.010, 
+        wait_max = 0.5,  
+        shm_retries = 999,  
+    }
+
+    local cache, err = mlcache.new(&quot;my_cache&quot;, &quot;cache_dict&quot;, {
+        lru_size = 500,    -- size of the L1 (Lua VM) cache
+        ttl      = 3600,   -- 1h ttl for hits
+        neg_ttl  = 30,     -- 30s ttl for misses
+        shm_locks = &quot;cache_lock&quot;,
+        resty_lock_opts = {
+            exptime = 10,
+            timeout = 5
+        },
+        ipc = {
+            register_listeners = function(events)
+                for _, event_t in pairs(events) do
+                    worker_events.register(
+                        function(data)
+                            event_t.handler(data)
+                        end,
+                        channel_name,
+                        event_t.channel
+                    )
+                end
+            end,
+            broadcast = function(channel, data)
+                worker_events.post(channel_name, channel, data)
+            end
+        }
+    })
+    if err then
+
+    end
+}
+</code></pre>
+<p>以上ipc部分代码截取自Kong项目，有兴趣也可以去参考一下它的设计模式。</p>
 
                         </div>
                         
@@ -271,9 +417,10 @@
                                 <ul class="markdownIt-TOC">
 <li>
 <ul>
-<li><a href="#%E5%85%A5%E9%97%A8%E7%AF%87">入门篇</a></li>
-<li><a href="#%E5%8E%9F%E7%90%86%E7%AF%87">原理篇</a></li>
-<li><a href="#%E9%9B%86%E6%88%90%E7%AF%87">集成篇</a></li>
+<li><a href="#%E7%AE%80%E4%BB%8B">简介</a></li>
+<li><a href="#%E7%BC%93%E5%AD%98%E6%A8%A1%E5%9D%97">缓存模块</a></li>
+<li><a href="#%E7%BC%93%E5%AD%98%E9%A3%8E%E6%9A%B4%E9%97%AE%E9%A2%98">缓存风暴问题</a></li>
+<li><a href="#%E8%BF%9B%E7%A8%8B%E4%B9%8B%E9%97%B4%E6%95%B0%E6%8D%AE%E5%90%8C%E6%AD%A5">进程之间数据同步</a></li>
 </ul>
 </li>
 </ul>
@@ -291,7 +438,7 @@
 
                                                 <p class="copyright-item">
                                                     <span>&#x94FE;&#x63A5;:</span>
-                                                    <span><a href="https://xwl.io/post/WpUHlquQY/">https://xwl.io/post/WpUHlquQY/</a></span>
+                                                    <span><a href="https://xwl.io/post/openresty-worker-cache/">https://xwl.io/post/openresty-worker-cache/</a></span>
                                                 </p>
 
                                                 <p class="copyright-item">
@@ -306,9 +453,9 @@
                                                                     <span style="margin-right:15px">
                         <i class="post-share"></i>
                         <span>&#x5206;&#x4EAB;:</span>
-                                                                    <a title="QR 码" target="_blank" href="https://api.qrserver.com/v1/create-qr-code/?size=150x150&data=https://xwl.io/post/WpUHlquQY/"><i class="fa fa-qrcode"></i></a>
-                                                                    <a title="QQ" target="_blank" href="https://sns.qzone.qq.com/cgi-bin/qzshare/cgi_qzshare_onekey?url=https://xwl.io/post/WpUHlquQY/&sharesource=qzone&title=Kubernetes学习路径 &amp; 教程&pics=https://xwl.io/images/avatar.png?v=1621878878195&summary="><i class="fa fa-qq"></i></a>
-                                                                    <a title="新浪微博" target="_blank" href="https://service.weibo.com/share/share.php?url=https://xwl.io/post/WpUHlquQY/&sharesource=weibo&title=Kubernetes学习路径 &amp; 教程 + " - " + &pic="https://xwl.io/images/avatar.png?v=1621878878195 "><i class="fa fa-weibo "></i></a>
+                                                                    <a title="QR 码" target="_blank" href="https://api.qrserver.com/v1/create-qr-code/?size=150x150&data=https://xwl.io/post/openresty-worker-cache/"><i class="fa fa-qrcode"></i></a>
+                                                                    <a title="QQ" target="_blank" href="https://sns.qzone.qq.com/cgi-bin/qzshare/cgi_qzshare_onekey?url=https://xwl.io/post/openresty-worker-cache/&sharesource=qzone&title=OpenResty Worker缓存&pics=https://xwl.io/images/avatar.png?v=1621878878195&summary="><i class="fa fa-qq"></i></a>
+                                                                    <a title="新浪微博" target="_blank" href="https://service.weibo.com/share/share.php?url=https://xwl.io/post/openresty-worker-cache/&sharesource=weibo&title=OpenResty Worker缓存 + " - " + &pic="https://xwl.io/images/avatar.png?v=1621878878195 "><i class="fa fa-weibo "></i></a>
 
                                                                     </span>
                                                                     
@@ -319,8 +466,8 @@
                                                                                     <span class="tag ">
                         
                         
-                        <a href="https://xwl.io/tag/kubernetes/">#
-                    kubernetes
+                        <a href="https://xwl.io/tag/openresty/">#
+                    openresty
                         </a>
                         
                             
@@ -338,13 +485,9 @@
                                                                                 <!---->
                                                                                 <section class="post-nav">
                                                                                     
-                                                                                        <a class="prev" rel="prev" href="https://xwl.io/post/RlIk8BA71/">
-                                                                                            操作系统的上下文切换
-                                                                                        </a>
-                                                                                        
                                                                                             
-                                                                                                <a class="next" rel="next" href="https://xwl.io/post/hhkktAeFo/">
-                                                                                                    kubernetes基础架构
+                                                                                                <a class="next" rel="next" href="https://xwl.io/post/openresty-nginx-configure/">
+                                                                                                    OpenResty 中的 Nginx 配置文件详解
                                                                                                 </a>
                                                                                                 
                                                                                 </section>

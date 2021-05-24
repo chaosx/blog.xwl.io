@@ -2,7 +2,7 @@
 <feed xmlns="http://www.w3.org/2005/Atom">
     <id>https://xwl.io</id>
     <title>许大仙的博客</title>
-    <updated>2021-05-24T17:53:43.908Z</updated>
+    <updated>2021-05-24T17:55:48.650Z</updated>
     <generator>https://github.com/jpmonette/feed</generator>
     <link rel="alternate" href="https://xwl.io"/>
     <link rel="self" href="https://xwl.io/atom.xml"/>
@@ -12,8 +12,8 @@
     <rights>All rights reserved 2021, 许大仙的博客</rights>
     <entry>
         <title type="html"><![CDATA[OpenResty Worker缓存]]></title>
-        <id>https://xwl.io/post/openresty-cache/</id>
-        <link href="https://xwl.io/post/openresty-cache/">
+        <id>https://xwl.io/post/openresty-worker-cache/</id>
+        <link href="https://xwl.io/post/openresty-worker-cache/">
         </link>
         <updated>2021-05-24T16:03:17.000Z</updated>
     </entry>
