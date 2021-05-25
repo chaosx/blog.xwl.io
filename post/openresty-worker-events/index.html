@@ -4,7 +4,7 @@
 <head>
     <meta charset="utf-8" />
 <title>
-    Python Peewee 使用 | 许大仙的博客
+    OpenResty Worker之间的通讯 | 许大仙的博客
 </title>
 <!--[if lt IE 9]><script src="//cdn.bootcss.com/html5shiv/r29/html5.js"></script><![endif]-->
 <meta content="width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=0" name="viewport" />
@@ -221,7 +221,7 @@
                     <article class="post-wrap">
                         <header class="post-header">
                             <h1 class="post-title">
-                                Python Peewee 使用
+                                OpenResty Worker之间的通讯
                             </h1>
                             
                                     <!--zh-->
@@ -230,15 +230,15 @@
                                         <a itemprop="author" rel="author" href="/">
                                             许大仙
                                         </a>
-                                        <span class="post-time">&#x65E5;&#x671F;: <a href="#">2021-05-17</a></span>
+                                        <span class="post-time">&#x65E5;&#x671F;: <a href="#">2021-05-25</a></span>
                                         <span class="post-readtime">&#x9605;&#x8BFB;&#x65F6;&#x95F4;:<a
-                                    href="#">2.5
+                                    href="#">3.6
                                     &#x5206;&#x949F;</a></span>
-                                        <span class="post-words">&#x5B57;&#x6570;:<a href="#">610</a></span>
+                                        <span class="post-words">&#x5B57;&#x6570;:<a href="#">771</a></span>
                                         
                                             <span class="post-category">&#x5206;&#x7C7B;:
                                 
-                                <a href="https://xwl.io/tag/python/">python</a>
+                                <a href="https://xwl.io/tag/openresty/">openresty</a>
                                 
                             </span>
                                                 
@@ -247,99 +247,132 @@
                         </header>
                         
                         <div class="post-content">
-                            <p>在Python ORM的选型过程中，我们经常会拿Peewee和SQLAlchemy进行对比。</p>
-<p>从功能的全面与强大而言，在大型项目中，肯定优先选择SQLAlchemy。作为运维而言，大多都是中小型项目居多，Peewee作为轻量级的ORM，使用也非常简单，自然作为首选了。</p>
-<p>下面介绍了大致的使用方式。</p>
-<h2 id="创建数据库连接">创建数据库连接</h2>
-<p>直接创建连接</p>
-<pre><code class="language-python">from peewee import MySQLDatabase
+                            <h2 id="简介">简介</h2>
+<p>OpenResty提供了共享内存的机制，可以用它进行Worker进程之间的通讯、传递数据等。</p>
+<p>我们使用Kong封装好的模块：<a href="https://github.com/Kong/lua-resty-worker-events">lua-resty-worker-events</a>。</p>
+<p>此模块提供了一种向Nginx服务器中的其他工作进程发送事件的方法。通信是通过一个共享的存储区进行的，事件数据将存储在该存储区中。</p>
+<p>所有工人的事件顺序都是相同的。</p>
+<p>工作进程将设置一个计时器来检查后台事件。模块遵循单例模式，因此每个worker运行一次。但是，如果保持最新状态很重要，那么可以将间隔设置为较低的频率，并且在收到每个请求时进行轮询的调用可以确保尽快处理所有事情。</p>
+<h2 id="示例与封装">示例与封装</h2>
+<p>以下是官方给出的使用示例</p>
+<pre><code class="language-nginx">http {
+    lua_package_path &quot;/path/to/lua-resty-worker-events/lib/?.lua;;&quot;;
 
-db = MySQLDatabase(
-    'database_name', 
-    user='root', 
-    password='secret',
-    host='db.xwl.io',
-    charset='utf8mb4')
-</code></pre>
-<p>当然我们更多的是配合连接池使用</p>
-<pre><code class="language-python">from playhouse.pool import PooledMySQLDatabase
+    # the size depends on the number of event to handle:
+    lua_shared_dict process_events 1m;
 
-db = PooledMySQLDatabase(
-    'database_name',
-    max_connections=8,
-    stale_timeout=300,
-    user='root')
+    init_worker_by_lua_block {
+        local ev = require &quot;resty.worker.events&quot;
 
-class BaseModel(Model):
-    class Meta:
-        database = db
-</code></pre>
-<h2 id="创建模型表">创建模型表</h2>
-<p>通常的做法是定义一个公共的Model，用于存储公共的字段和方法。</p>
-<pre><code class="language-python">import datetime
-from peewee import Model, DateTimeField, IntegerField
+        local handler = function(data, event, source, pid)
+            print(&quot;received event; source=&quot;,source,
+                  &quot;, event=&quot;,event,
+                  &quot;, data=&quot;, tostring(data),
+                  &quot;, from process &quot;,pid)
+        end
 
+        ev.register(handler)
 
-class BaseModel(Model):
-    create_time = DateTimeField(default=datetime.datetime.now)
-    update_time = DateTimeField(default=datetime.datetime.now)
-    deleted     = IntegerField()
+        local ok, err = ev.configure {
+            shm = &quot;process_events&quot;, -- defined by &quot;lua_shared_dict&quot;
+            timeout = 2,            -- life time of unique event data in shm
+            interval = 1,           -- poll interval (seconds)
 
-    def save(self, *args, **kwargs):
-        self.update_time = datetime.datetime.now()
-        return super(BaseModel, self).save(*args, **kwargs)
+            wait_interval = 0.010,  -- wait before retry fetching event data
+            wait_max = 0.5,         -- max wait time before discarding event
+            shm_retries = 999,      -- retries for shm fragmentation (no memory)
+        }
+        if not ok then
+            ngx.log(ngx.ERR, &quot;failed to start event system: &quot;, err)
+            return
+        end
+    }
 
-    class Meta:
-        database = db
-</code></pre>
-<p>在SQLAlchemy中，在定义字段的时候，可以使用<code>onupdate</code>关键字，在Peewee的模块中可没有这个功能过，于是我们重构的<code>save</code>方法。</p>
-<p>除此之外，其实还有一些公共的字段，比如主键id、操作用户等，也可以放置于<code>BaseModel</code>中。</p>
-<p>我们尝试创建一个用户表：</p>
-<pre><code class="language-python">from peewee import AutoField, CharField
+    server {
+        ...
 
+        # example for polling:
+        location = /some/path {
 
-class User(BaseModel):
-    class Meta:
-        table_name = 'user'
+            default_type text/plain;
+            content_by_lua_block {
+                -- manually call `poll` to stay up to date, can be used instead,
+                -- or together with the timer interval. Polling is efficient,
+                -- so if staying up-to-date is important, this is preferred.
+                require(&quot;resty.worker.events&quot;).poll()
 
-    id = AutoField()
-    username = CharField(max_length=32)
+                -- do regular stuff here
+
+            }
+        }
+    }
+}
 </code></pre>
-<p>修改内置的<code>table_name</code>字段可以定义创建表结构时使用的表名称，<code>AutoField</code>的意思是一个自增的主键ID，<code>CharField</code>在MySQL中就是varchar，<code>max_length</code>就是定义该字段的最大长度。</p>
-<p>字段类型表如下图所示<br>
-<img src="https://xwl.io/post-images/1621259805425.jpg" alt="" loading="lazy"></p>
-<p>创建表也非常简单</p>
-<pre><code class="language-python">db.create_tables([User])
+<p>在我们项目使用的过程中，一般会分为两部分。</p>
+<p>首先我们会初始化worker events，也就是对事件触发的一些参数进行配置。</p>
+<pre><code class="language-lua">function init_worker_events()
+    local worker_events = require &quot;resty.worker.events&quot;
+    
+    local ok, err =
+        worker_events.configure {
+        shm = &quot;cpia_worker_events&quot;, -- defined by &quot;lua_shared_dict&quot;
+        timeout = 5, -- life time of event data in shm
+        interval = 0.5, -- poll interval (seconds)
+        wait_interval = 0.010, -- wait before retry fetching event data
+        wait_max = 0.5 -- max wait time before discarding event
+    }
+    if not ok then
+        return nil, err
+    end
+
+    return worker_events
+end
 </code></pre>
-<p>默认情况下，peewee包括 IF NOT EXISTS 创建表时使用子句。</p>
-<h2 id="存储与检索数据">存储与检索数据</h2>
-<p><strong>增</strong></p>
-<p>添加一行数据</p>
-<pre><code class="language-python">user = User(username=&quot;xwl&quot;)
-user.save()
+<p>然后会对它进行简单的封装，根据开发者的使用习惯，使用更通用的命名模式。</p>
+<pre><code class="language-lua">function process_event(worker_events)
+    local m = {}
+
+    m.worker_events = worker_events
+
+    m.publish = function(source, event, data)
+        worker_events.post(source, event, data)
+    end
+
+    m.subscribe = function(callback, source, ...)
+        worker_events.register(callback, source, ...)
+    end
+
+    m.unsubscribe = function(callback, source, ...)
+        worker_events.unregister(callback, source, ...)
+    end
+
+    return m
+end
 </code></pre>
-<p>或者可以使用一段JSON格式的数据</p>
-<pre><code class="language-python">data = {&quot;username&quot;: &quot;xwl&quot;}
-user = User(**data)
-user.save()
-</code></pre>
-<p><strong>删</strong></p>
-<pre><code class="language-python">User.delete().where(User.id == 1).execute()
-</code></pre>
-<p><strong>改</strong></p>
-<pre><code class="language-python">User.update(username=&quot;xwl-2&quot;).where(User.id == 1).execute()
-</code></pre>
-<p><strong>查</strong></p>
-<p>查询数据的基本格式是这样</p>
-<pre><code class="language-python">select_queries = User.select(...).where(...).order_by(...).limit(...)...
-</code></pre>
-<p>就跟SQL的使用差不多，按需使用即可，更多内容的参考官方文档。</p>
-<p>运维应用也就拿来做做管理后台，以上基本就能满足绝大多数场景，也不建议用的太过于复杂，维护起来会很痛苦。</p>
-<h2 id="参考">参考</h2>
+<h2 id="使用方式">使用方式</h2>
+<p>以上我们对其进行了封装，介绍一下如何使用。</p>
 <ul>
-<li><a href="http://docs.peewee-orm.com/en/latest/">Peewee 官方文档</a></li>
-<li><a href="https://www.osgeo.cn/peewee/">Peewee 中文文档</a></li>
+<li>订阅事件</li>
 </ul>
+<pre><code class="language-lua">local callback = function(data, event, source, pid)
+    --- process events
+end
+event.subscribe(callback, &quot;load&quot;, &quot;ssl&quot;)
+</code></pre>
+<p>这个方法订阅了<code>load</code>模块下的<code>ssl</code>事件，callback传递的参数详细参考文档。</p>
+<ul>
+<li>推送事件</li>
+</ul>
+<pre><code class="language-lua">local data = {version = &quot;0.1&quot;}
+event.publish(&quot;load&quot;, &quot;ssl&quot;,  data)
+</code></pre>
+<p>这个方法把数据<code>data</code>推送给<code>load</code>模块的<code>ssl</code>事件。</p>
+<ul>
+<li>取消订阅事件</li>
+</ul>
+<pre><code class="language-lua">event.unsubscribe(callback, &quot;load&quot;, &quot;ssl&quot;)
+</code></pre>
+<p>这个方法会取消订阅<code>load</code>模块的<code>ssl</code>事件，就是这个取消事件，居然还要带上callback方法，实属让人不解。</p>
 
                         </div>
                         
@@ -347,10 +380,9 @@ user.save()
                                 <ul class="markdownIt-TOC">
 <li>
 <ul>
-<li><a href="#%E5%88%9B%E5%BB%BA%E6%95%B0%E6%8D%AE%E5%BA%93%E8%BF%9E%E6%8E%A5">创建数据库连接</a></li>
-<li><a href="#%E5%88%9B%E5%BB%BA%E6%A8%A1%E5%9E%8B%E8%A1%A8">创建模型表</a></li>
-<li><a href="#%E5%AD%98%E5%82%A8%E4%B8%8E%E6%A3%80%E7%B4%A2%E6%95%B0%E6%8D%AE">存储与检索数据</a></li>
-<li><a href="#%E5%8F%82%E8%80%83">参考</a></li>
+<li><a href="#%E7%AE%80%E4%BB%8B">简介</a></li>
+<li><a href="#%E7%A4%BA%E4%BE%8B%E4%B8%8E%E5%B0%81%E8%A3%85">示例与封装</a></li>
+<li><a href="#%E4%BD%BF%E7%94%A8%E6%96%B9%E5%BC%8F">使用方式</a></li>
 </ul>
 </li>
 </ul>
@@ -368,7 +400,7 @@ user.save()
 
                                                 <p class="copyright-item">
                                                     <span>&#x94FE;&#x63A5;:</span>
-                                                    <span><a href="https://xwl.io/post/python-peewee/">https://xwl.io/post/python-peewee/</a></span>
+                                                    <span><a href="https://xwl.io/post/openresty-worker-events/">https://xwl.io/post/openresty-worker-events/</a></span>
                                                 </p>
 
                                                 <p class="copyright-item">
@@ -383,9 +415,9 @@ user.save()
                                                                     <span style="margin-right:15px">
                         <i class="post-share"></i>
                         <span>&#x5206;&#x4EAB;:</span>
-                                                                    <a title="QR 码" target="_blank" href="https://api.qrserver.com/v1/create-qr-code/?size=150x150&data=https://xwl.io/post/python-peewee/"><i class="fa fa-qrcode"></i></a>
-                                                                    <a title="QQ" target="_blank" href="https://sns.qzone.qq.com/cgi-bin/qzshare/cgi_qzshare_onekey?url=https://xwl.io/post/python-peewee/&sharesource=qzone&title=Python Peewee 使用&pics=https://xwl.io/images/avatar.png?v=1621954596449&summary="><i class="fa fa-qq"></i></a>
-                                                                    <a title="新浪微博" target="_blank" href="https://service.weibo.com/share/share.php?url=https://xwl.io/post/python-peewee/&sharesource=weibo&title=Python Peewee 使用 + " - " + &pic="https://xwl.io/images/avatar.png?v=1621954596449 "><i class="fa fa-weibo "></i></a>
+                                                                    <a title="QR 码" target="_blank" href="https://api.qrserver.com/v1/create-qr-code/?size=150x150&data=https://xwl.io/post/openresty-worker-events/"><i class="fa fa-qrcode"></i></a>
+                                                                    <a title="QQ" target="_blank" href="https://sns.qzone.qq.com/cgi-bin/qzshare/cgi_qzshare_onekey?url=https://xwl.io/post/openresty-worker-events/&sharesource=qzone&title=OpenResty Worker之间的通讯&pics=https://xwl.io/images/avatar.png?v=1621954596449&summary="><i class="fa fa-qq"></i></a>
+                                                                    <a title="新浪微博" target="_blank" href="https://service.weibo.com/share/share.php?url=https://xwl.io/post/openresty-worker-events/&sharesource=weibo&title=OpenResty Worker之间的通讯 + " - " + &pic="https://xwl.io/images/avatar.png?v=1621954596449 "><i class="fa fa-weibo "></i></a>
 
                                                                     </span>
                                                                     
@@ -396,8 +428,8 @@ user.save()
                                                                                     <span class="tag ">
                         
                         
-                        <a href="https://xwl.io/tag/python/">#
-                    python
+                        <a href="https://xwl.io/tag/openresty/">#
+                    openresty
                         </a>
                         
                             
@@ -415,13 +447,9 @@ user.save()
                                                                                 <!---->
                                                                                 <section class="post-nav">
                                                                                     
-                                                                                        <a class="prev" rel="prev" href="https://xwl.io/post/learning-method/">
-                                                                                            高效学习的正确方法
-                                                                                        </a>
-                                                                                        
                                                                                             
-                                                                                                <a class="next" rel="next" href="https://xwl.io/post/uTLx54AFk/">
-                                                                                                    Python 监控域名信息
+                                                                                                <a class="next" rel="next" href="https://xwl.io/post/openresty-worker-cache/">
+                                                                                                    OpenResty Worker缓存
                                                                                                 </a>
                                                                                                 
                                                                                 </section>
