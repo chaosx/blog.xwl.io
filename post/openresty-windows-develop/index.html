@@ -4,7 +4,7 @@
 <head>
     <meta charset="utf-8" />
 <title>
-    许大仙的博客
+    Windows下开发OpenResty | 许大仙的博客
 </title>
 <!--[if lt IE 9]><script src="//cdn.bootcss.com/html5shiv/r29/html5.js"></script><![endif]-->
 <meta content="width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=0" name="viewport" />
@@ -218,113 +218,154 @@
 
             <div class="main">
                 <div class="container">
-                    <div class="post-wrap archive">
-                        
+                    <article class="post-wrap">
+                        <header class="post-header">
+                            <h1 class="post-title">
+                                Windows下开发OpenResty
+                            </h1>
                             
-                                <h3>
-                                    2021
-                                </h3>
+                                    <!--zh-->
+                                    <div class="post-meta zh">
+                                        &#x4F5C;&#x8005;:
+                                        <a itemprop="author" rel="author" href="/">
+                                            许大仙
+                                        </a>
+                                        <span class="post-time">&#x65E5;&#x671F;: <a href="#">2021-05-27</a></span>
+                                        <span class="post-readtime">&#x9605;&#x8BFB;&#x65F6;&#x95F4;:<a
+                                    href="#">0.9
+                                    &#x5206;&#x949F;</a></span>
+                                        <span class="post-words">&#x5B57;&#x6570;:<a href="#">253</a></span>
+                                        
+                                            <span class="post-category">&#x5206;&#x7C7B;:
+                                
+                                <a href="https://xwl.io/tag/openresty/">openresty</a>
+                                
+                            </span>
+                                                
+                                    </div>
+                                    
+                        </header>
+                        
+                        <div class="post-content">
+                            <p>那是相当的痛苦，不到万不得已，请不要使用Windows进行开发。</p>
+<h2 id="准备容器环境">准备容器环境</h2>
+<p>首先安装一个Docker，使用<code>/bin/bash</code>命令运行OpenResty的容器。</p>
+<p>启动命令如下</p>
+<pre><code class="language-shell">docker run -ti openresty/openresty:bionic -v /code:/code /bin/bash
+</code></pre>
+<p>至于原因嘛，偶尔也会有重启OpenResty的需求，目的是为了清空相关的缓存规则。</p>
+<h2 id="安装ide与开发">安装IDE与开发</h2>
+<p>这里选择vscode，开发并没有特别配套的工具，大部分情况下还是打印调试日志。</p>
+<p>在插件市场有一个名叫<code>luaide</code>的非常好使，还支持断点调试，就是要收费。</p>
+<p>这里安装使用<code>Remote - Containers</code>插件</p>
+<p>安装好之后在左侧栏点击Remote Explorer，选择刚刚启动的容器。</p>
+<figure data-type="image" tabindex="1"><img src="https://xwl.io/post-images/1622132649744.jpg" alt="" loading="lazy"></figure>
+<p>这个时候会弹出一个新的开发窗口，打开我们挂载的<code>/code</code>目录进行开发即可。</p>
+<figure data-type="image" tabindex="2"><img src="https://xwl.io/post-images/1622132882663.png" alt="" loading="lazy"></figure>
+<p>唯一不同的是，在我们启动OpenResty之后，它会自动映射服务端口，也是非常智能了。</p>
+<figure data-type="image" tabindex="3"><img src="https://xwl.io/post-images/1622132958627.png" alt="" loading="lazy"></figure>
+
+                        </div>
+                        
+                            <div class="post-toc">
+                                <ul class="markdownIt-TOC">
+<li>
+<ul>
+<li><a href="#%E5%87%86%E5%A4%87%E5%AE%B9%E5%99%A8%E7%8E%AF%E5%A2%83">准备容器环境</a></li>
+<li><a href="#%E5%AE%89%E8%A3%85ide%E4%B8%8E%E5%BC%80%E5%8F%91">安装IDE与开发</a></li>
+</ul>
+</li>
+</ul>
+
+                            </div>
+                            
                                 
                                     
+                                            <!--zh-->
+                                            <section class="post-copyright zh">
+                                                <p class="copyright-item ">
+                                                    <span>&#x4F5C;&#x8005;:</span>
+                                                    <span>许大仙</span>
+                                                </p>
 
-                                        <article class="archive-item">
-                                            <a class="archive-item-link" href="https://xwl.io/post/python-peewee/">
-                                                Python Peewee 使用
-                                            </a>
-                                            <span class="archive-item-date">2021-05-17 </span>
-                                        </article>
-                                        
-                                            
-                                    
+                                                <p class="copyright-item">
+                                                    <span>&#x94FE;&#x63A5;:</span>
+                                                    <span><a href="https://xwl.io/post/openresty-windows-develop/">https://xwl.io/post/openresty-windows-develop/</a></span>
+                                                </p>
 
-                                        <article class="archive-item">
-                                            <a class="archive-item-link" href="https://xwl.io/post/uTLx54AFk/">
-                                                Python 监控域名信息
-                                            </a>
-                                            <span class="archive-item-date">2021-05-15 </span>
-                                        </article>
-                                        
-                                            
-                                    
-
-                                        <article class="archive-item">
-                                            <a class="archive-item-link" href="https://xwl.io/post/NYZgYN2ak/">
-                                                Python AES/CBC/PKCS5Padding 加解密
-                                            </a>
-                                            <span class="archive-item-date">2021-05-13 </span>
-                                        </article>
-                                        
-                                            
-                                    
-
-                                        <article class="archive-item">
-                                            <a class="archive-item-link" href="https://xwl.io/post/9LRClFOn3/">
-                                                Python Vue 部署与联调测试
-                                            </a>
-                                            <span class="archive-item-date">2021-05-11 </span>
-                                        </article>
-                                        
-                                            
-                                    
-
-                                        <article class="archive-item">
-                                            <a class="archive-item-link" href="https://xwl.io/post/Aqi_GBQPM/">
-                                                Python 证书管理
-                                            </a>
-                                            <span class="archive-item-date">2021-05-11 </span>
-                                        </article>
-                                        
-                                            
-                                    
-
-                                        <article class="archive-item">
-                                            <a class="archive-item-link" href="https://xwl.io/post/Qc51rd-j-/">
-                                                使用GitHub Action自动提交网站收录
-                                            </a>
-                                            <span class="archive-item-date">2021-05-09 </span>
-                                        </article>
-                                        
-                                            
-                                    
-
-                                        <article class="archive-item">
-                                            <a class="archive-item-link" href="https://xwl.io/post/okYjMtPcs/">
-                                                关于GitLab CI常用策略
-                                            </a>
-                                            <span class="archive-item-date">2021-05-07 </span>
-                                        </article>
-                                        
-                                            
-                                    
-
-                                        <article class="archive-item">
-                                            <a class="archive-item-link" href="https://xwl.io/post/Fml9VHfUQ/">
-                                                Python 2的中文编码问题
-                                            </a>
-                                            <span class="archive-item-date">2021-05-05 </span>
-                                        </article>
-                                        
-                                            
-                                    
-
-                                        <article class="archive-item">
-                                            <a class="archive-item-link" href="https://xwl.io/post/e5-HJIifG/">
-                                                软件测试快速入门指南
-                                            </a>
-                                            <span class="archive-item-date">2021-05-03 </span>
-                                        </article>
-                                        
+                                                <p class="copyright-item">
+                                                    <span>&#x534F;&#x8BAE;:</span>
+                                                    <span><a href="https://creativecommons.org/licenses/by-sa/4.0/">CC BY-SA 4.0</a></span>
+                                                </p>
+                                            </section>
                                             
                                                 
-                    </div>
-                    <div class="pagination-container">
+                                                    
+                                                                    <!--Share-->
+                                                                    <span style="margin-right:15px">
+                        <i class="post-share"></i>
+                        <span>&#x5206;&#x4EAB;:</span>
+                                                                    <a title="QR 码" target="_blank" href="https://api.qrserver.com/v1/create-qr-code/?size=150x150&data=https://xwl.io/post/openresty-windows-develop/"><i class="fa fa-qrcode"></i></a>
+                                                                    <a title="QQ" target="_blank" href="https://sns.qzone.qq.com/cgi-bin/qzshare/cgi_qzshare_onekey?url=https://xwl.io/post/openresty-windows-develop/&sharesource=qzone&title=Windows下开发OpenResty&pics=https://xwl.io/images/avatar.png?v=1622132959803&summary="><i class="fa fa-qq"></i></a>
+                                                                    <a title="新浪微博" target="_blank" href="https://service.weibo.com/share/share.php?url=https://xwl.io/post/openresty-windows-develop/&sharesource=weibo&title=Windows下开发OpenResty + " - " + &pic="https://xwl.io/images/avatar.png?v=1622132959803 "><i class="fa fa-weibo "></i></a>
+
+                                                                    </span>
+                                                                    
+                                                                            <!--zh-->
+                                                                            <section class="post-tags zh ">
+                                                                                <div>
+                                                                                    <span>&#x6807;&#x7B7E;:</span>
+                                                                                    <span class="tag ">
+                        
+                        
+                        <a href="https://xwl.io/tag/openresty/">#
+                    openresty
+                        </a>
                         
                             
-                                    
-                                            
-                    </div>
+                                </span>
+                                                                                </div>
+                                                                                <div>
+                                                                                    <a href="javascript:window.history.back();">
+                        &#x8FD4;&#x56DE;</a>
+                                                                                    <span>&dot;</span>
+                                                                                    <a href="#">&#x4E3B;&#x9875;</a>
+                                                                                </div>
+                                                                            </section>
+
+                                                                            
+                                                                                <!---->
+                                                                                <section class="post-nav">
+                                                                                    
+                                                                                            
+                                                                                                <a class="next" rel="next" href="https://xwl.io/post/openresty-worker-events/">
+                                                                                                    OpenResty Worker之间的通讯
+                                                                                                </a>
+                                                                                                
+                                                                                </section>
+                                                                                
+                                                                                    <script type="application/javascript" src="//unpkg.com/valine@latest/dist/Valine.min.js"></script>
+<div id="vlaine-comment" style="margin-top: 55px;"></div>
+<script type="application/javascript">
+    new Valine({
+        el: '#vlaine-comment',
+        appId: 'BSG06sWbHRwEElng5cXBc98v-MdYXbMMI',
+        appKey: 'Chxyat5TwxYpmX1H4rzTd6E2',
+        pageSize: 10,
+        avatar: 'robohash',
+        placeholder: '来都来了，不妨评论一下',
+        visitor: false,
+        highlight: true,
+        recordIP: false,
+    })
+</script>
+                                                                                
+                    </article>
                 </div>
+                
             </div>
+    </div>
+    </div>
     </div>
     
 
@@ -366,5 +407,8 @@
 </script>
         </div>
 </body>
+<script>
+    scroll();
+</script>
 
 </html>
