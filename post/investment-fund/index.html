@@ -4,7 +4,7 @@
 <head>
     <meta charset="utf-8" />
 <title>
-    Python 证书管理 | 许大仙的博客
+    关于投资基金那些事 | 许大仙的博客
 </title>
 <!--[if lt IE 9]><script src="//cdn.bootcss.com/html5shiv/r29/html5.js"></script><![endif]-->
 <meta content="width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=0" name="viewport" />
@@ -221,7 +221,7 @@
                     <article class="post-wrap">
                         <header class="post-header">
                             <h1 class="post-title">
-                                Python 证书管理
+                                关于投资基金那些事
                             </h1>
                             
                                     <!--zh-->
@@ -230,15 +230,15 @@
                                         <a itemprop="author" rel="author" href="/">
                                             许大仙
                                         </a>
-                                        <span class="post-time">&#x65E5;&#x671F;: <a href="#">2021-05-11</a></span>
+                                        <span class="post-time">&#x65E5;&#x671F;: <a href="#">2021-06-07</a></span>
                                         <span class="post-readtime">&#x9605;&#x8BFB;&#x65F6;&#x95F4;:<a
-                                    href="#">3.3
+                                    href="#">2.2
                                     &#x5206;&#x949F;</a></span>
-                                        <span class="post-words">&#x5B57;&#x6570;:<a href="#">653</a></span>
+                                        <span class="post-words">&#x5B57;&#x6570;:<a href="#">656</a></span>
                                         
                                             <span class="post-category">&#x5206;&#x7C7B;:
                                 
-                                <a href="https://xwl.io/tag/python/">python</a>
+                                <a href="https://xwl.io/tag/personal-growth/">个人成长</a>
                                 
                             </span>
                                                 
@@ -247,112 +247,43 @@
                         </header>
                         
                         <div class="post-content">
-                            <p>在开发运维平台的时候，都有绕不过的一个需求，那就是对网站证书的管理。</p>
-<p>我们需要对证书进行集中化管理，包括颁发证书、解析证书，甚至要定时分析是否有证书过期需要即时续费等，给管理人员一个直观的展示。</p>
-<p>首先安装依赖模块，<code>pyopenssl</code>用于证书解析和<code>python-dateutil</code>模块用于日期解析，使用pip直接安装即可。</p>
-<pre><code class="language-bash">pip install pyopenssl python-dateutil
-</code></pre>
-<p>生成证书脚本</p>
-<pre><code class="language-python">from OpenSSL import crypto
-
-
-k = crypto.PKey()
-k.generate_key(crypto.TYPE_RSA, 2048)  # generate RSA key-pair
-
-cert = crypto.X509()
-cert.get_subject().C = &quot;CN&quot;
-cert.get_subject().O = &quot;XWL, Inc.&quot;
-cert.get_subject().OU = &quot;XWL&quot;
-cert.get_subject().CN = &quot;xwl.io&quot;
-cert.set_serial_number(1000)
-cert.gmtime_adj_notBefore(0)
-cert.gmtime_adj_notAfter(10*365*24*60*60)
-cert.set_issuer(cert.get_subject())
-
-cert.set_pubkey(k)
-cert.sign(k, 'sha256')
-open(&quot;selfsign.crt&quot;, 'wb').write(crypto.dump_certificate(crypto.FILETYPE_PEM, cert))
-open(&quot;private.key&quot;, 'wb').write(crypto.dump_privatekey(crypto.FILETYPE_PEM, k))
-</code></pre>
-<p>直接使用刚刚生成的证书进行解析，具体注释下脚本输出内容中已有说明。</p>
-<pre><code class="language-python">import OpenSSL
-import time
-from dateutil import parser
-
-cert = OpenSSL.crypto.load_certificate(OpenSSL.crypto.FILETYPE_PEM, open(&quot;selfsign.crt&quot;).read())
-certIssue = cert.get_issuer()
-
-print (&quot;证书版本:            &quot;,cert.get_version() + 1)
-
-print (&quot;证书序列号:          &quot;,hex(cert.get_serial_number()))
-
-print (&quot;证书中使用的签名算法: &quot;,cert.get_signature_algorithm().decode(&quot;UTF-8&quot;))
-
-print (&quot;颁发者:              &quot;,certIssue.commonName)
-
-datetime_struct = parser.parse(cert.get_notBefore().decode(&quot;UTF-8&quot;))
-
-print (&quot;有效期从:             &quot;,datetime_struct.strftime('%Y-%m-%d %H:%M:%S'))
-
-datetime_struct = parser.parse(cert.get_notAfter().decode(&quot;UTF-8&quot;))
-
-print (&quot;到:                   &quot;,datetime_struct.strftime('%Y-%m-%d %H:%M:%S'))
-
-print (&quot;证书是否已经过期:      &quot;,cert.has_expired())
-
-print(&quot;公钥长度&quot; ,cert.get_pubkey().bits())
-
-print(&quot;公钥:\n&quot; ,OpenSSL.crypto.dump_publickey(OpenSSL.crypto.FILETYPE_PEM, cert.get_pubkey()).decode(&quot;utf-8&quot;))
-
-print(&quot;主体信息:&quot;)
-
-print(&quot;CN : 通用名称  OU : 机构单元名称&quot;)
-print(&quot;O  : 机构名    L  : 地理位置&quot;)
-print(&quot;S  : 州/省名   C  : 国名&quot;)
-
-for item in certIssue.get_components():
-    print(item[0].decode(&quot;utf-8&quot;), &quot;  ——  &quot;,item[1].decode(&quot;utf-8&quot;))
-
-print(cert.get_extension_count())
-
-subject = cert.get_subject()
-print(&quot;域名:\n&quot; ，subject.CN)
-</code></pre>
-<p>通常在接收到用户上传的证书之后，也会对其进行可用性校验，防止误传。</p>
-<pre><code class="language-python">import OpenSSL
-
-
-with open(&quot;selfsign.crt&quot;) as f:
-    crt = f.read()
-
-with open(&quot;private.key&quot;) as f:
-    key = f.read()
-
-try:
-    private_key_obj = OpenSSL.crypto.load_privatekey(OpenSSL.crypto.FILETYPE_PEM, private_key)
-except OpenSSL.crypto.Error:
-    raise Exception('private key is not correct: %s' % private_key)
-
-try:
-    cert_obj = OpenSSL.crypto.load_certificate(OpenSSL.crypto.FILETYPE_PEM, cert)
-except OpenSSL.crypto.Error:
-    raise Exception('certificate is not correct: %s' % cert)
-
-context = OpenSSL.SSL.Context(OpenSSL.SSL.TLSv1_METHOD)
-context.use_privatekey(private_key_obj)
-context.use_certificate(cert_obj)
-try:
-    context.check_privatekey()
-    print(&quot;ok&quot;)
-except OpenSSL.SSL.Error:
-    print(&quot;error&quot;)
-</code></pre>
-<p>以上就是我们常用的证书管理的操作，以及获取常用证书信息的方法。</p>
+                            <h2 id="简介">简介</h2>
+<p>近两年基金投资可谓是火热，某某爆款基金频率上热门，到底是普通人民群众集体觉醒，还是资本的引导？</p>
+<p>还有一些基金的课程，入门费交个一块到六块不等，究竟是你白嫖到了？还是被资本割了韭菜？</p>
+<p>还有很多种种问题值得深思。</p>
+<h2 id="普通人如何投资基金">普通人如何投资基金？</h2>
+<p>先说结论，普通人定投指数基金即可，是最稳定的赚钱机会，至少我国的整体趋势是向上的，说的离谱一点，买的是国运昌隆，没毛病吧？</p>
+<p>如果你学了一点相关知识，觉得自己不那么普通，可以尝试买一些行业指数基金，比如医疗行业之类的，选刚需品种即可。</p>
+<p>至于你交了钱去学理财课究竟有没有价值？我想大部分人都会把它们遗忘在时间的长河之中，只会保留一些基本的概念。</p>
+<h2 id="选基金就是选经理">选基金就是选经理？</h2>
+<p>这句话是对的。</p>
+<p>如果你买的主动型基金，那么不光要选经理，还要选公司、选团队。</p>
+<p>为什么？我们来看公募基金的盈利模式。</p>
+<p>公募基金的盈利只跟基金规模有关，然后从中抽取管理费。这就导致了，如果这个基金如果想盈利，就得故事说的好，吸引很多人去购买。</p>
+<p>至于基金经理会为你们投资的钱尽心尽力，甚至把它当自己的钱一样谨慎，你觉得可能？</p>
+<p>所以这不仅关乎基金经理的能力，还有人品，还包括公司的人品和相关团队的人品。</p>
+<p>虽然仍然有很多靠谱的基金经理，但我们普通人有什么渠道能够“选”呢？大多都是直觉、感觉，甚至“被营销”罢了。</p>
+<p>所以普通人，我还是建议选指数，至少暴雷的几率几乎为0。</p>
+<p>个人觉得优秀的经理最终都会走向私募，由于是盈利是提成模式，他们给客户创造价值的同时，也是给自己创造价值。不管从物质还是精神，都能给自己创造更大的满足感。</p>
+<h2 id="总结">总结</h2>
+<p>其实基金这个东西本身就没什么好聊的，选好之后定投即可。</p>
+<p>我们是个普通人，目的只是为了跑赢通货膨胀，在此基础上每年盈利百分之十，就非常可观了。</p>
+<p>最后，千万不要指望它让你发家致富！</p>
 
                         </div>
                         
                             <div class="post-toc">
-                                
+                                <ul class="markdownIt-TOC">
+<li>
+<ul>
+<li><a href="#%E7%AE%80%E4%BB%8B">简介</a></li>
+<li><a href="#%E6%99%AE%E9%80%9A%E4%BA%BA%E5%A6%82%E4%BD%95%E6%8A%95%E8%B5%84%E5%9F%BA%E9%87%91">普通人如何投资基金？</a></li>
+<li><a href="#%E9%80%89%E5%9F%BA%E9%87%91%E5%B0%B1%E6%98%AF%E9%80%89%E7%BB%8F%E7%90%86">选基金就是选经理？</a></li>
+<li><a href="#%E6%80%BB%E7%BB%93">总结</a></li>
+</ul>
+</li>
+</ul>
+
                             </div>
                             
                                 
@@ -366,7 +297,7 @@ except OpenSSL.SSL.Error:
 
                                                 <p class="copyright-item">
                                                     <span>&#x94FE;&#x63A5;:</span>
-                                                    <span><a href="https://xwl.io/post/Aqi_GBQPM/">https://xwl.io/post/Aqi_GBQPM/</a></span>
+                                                    <span><a href="https://xwl.io/post/investment-fund/">https://xwl.io/post/investment-fund/</a></span>
                                                 </p>
 
                                                 <p class="copyright-item">
@@ -381,9 +312,9 @@ except OpenSSL.SSL.Error:
                                                                     <span style="margin-right:15px">
                         <i class="post-share"></i>
                         <span>&#x5206;&#x4EAB;:</span>
-                                                                    <a title="QR 码" target="_blank" href="https://api.qrserver.com/v1/create-qr-code/?size=150x150&data=https://xwl.io/post/Aqi_GBQPM/"><i class="fa fa-qrcode"></i></a>
-                                                                    <a title="QQ" target="_blank" href="https://sns.qzone.qq.com/cgi-bin/qzshare/cgi_qzshare_onekey?url=https://xwl.io/post/Aqi_GBQPM/&sharesource=qzone&title=Python 证书管理&pics=https://xwl.io/images/avatar.png?v=1622998997710&summary="><i class="fa fa-qq"></i></a>
-                                                                    <a title="新浪微博" target="_blank" href="https://service.weibo.com/share/share.php?url=https://xwl.io/post/Aqi_GBQPM/&sharesource=weibo&title=Python 证书管理 + " - " + &pic="https://xwl.io/images/avatar.png?v=1622998997710 "><i class="fa fa-weibo "></i></a>
+                                                                    <a title="QR 码" target="_blank" href="https://api.qrserver.com/v1/create-qr-code/?size=150x150&data=https://xwl.io/post/investment-fund/"><i class="fa fa-qrcode"></i></a>
+                                                                    <a title="QQ" target="_blank" href="https://sns.qzone.qq.com/cgi-bin/qzshare/cgi_qzshare_onekey?url=https://xwl.io/post/investment-fund/&sharesource=qzone&title=关于投资基金那些事&pics=https://xwl.io/images/avatar.png?v=1622998997710&summary="><i class="fa fa-qq"></i></a>
+                                                                    <a title="新浪微博" target="_blank" href="https://service.weibo.com/share/share.php?url=https://xwl.io/post/investment-fund/&sharesource=weibo&title=关于投资基金那些事 + " - " + &pic="https://xwl.io/images/avatar.png?v=1622998997710 "><i class="fa fa-weibo "></i></a>
 
                                                                     </span>
                                                                     
@@ -394,8 +325,8 @@ except OpenSSL.SSL.Error:
                                                                                     <span class="tag ">
                         
                         
-                        <a href="https://xwl.io/tag/python/">#
-                    python
+                        <a href="https://xwl.io/tag/personal-growth/">#
+                    个人成长
                         </a>
                         
                             
@@ -413,13 +344,9 @@ except OpenSSL.SSL.Error:
                                                                                 <!---->
                                                                                 <section class="post-nav">
                                                                                     
-                                                                                        <a class="prev" rel="prev" href="https://xwl.io/post/9LRClFOn3/">
-                                                                                            Python Vue 部署与联调测试
-                                                                                        </a>
-                                                                                        
                                                                                             
-                                                                                                <a class="next" rel="next" href="https://xwl.io/post/Qc51rd-j-/">
-                                                                                                    使用GitHub Action自动提交网站收录
+                                                                                                <a class="next" rel="next" href="https://xwl.io/post/openresty-windows-develop/">
+                                                                                                    Windows下开发OpenResty
                                                                                                 </a>
                                                                                                 
                                                                                 </section>

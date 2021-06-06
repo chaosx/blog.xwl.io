@@ -2,7 +2,7 @@
 <feed xmlns="http://www.w3.org/2005/Atom">
     <id>https://xwl.io</id>
     <title>许大仙的博客</title>
-    <updated>2021-05-27T16:35:10.738Z</updated>
+    <updated>2021-06-06T17:03:30.818Z</updated>
     <generator>https://github.com/jpmonette/feed</generator>
     <link rel="alternate" href="https://xwl.io"/>
     <link rel="self" href="https://xwl.io/atom.xml"/>
@@ -10,6 +10,13 @@
     <logo>https://xwl.io/images/avatar.png</logo>
     <icon>https://xwl.io/favicon.ico</icon>
     <rights>All rights reserved 2021, 许大仙的博客</rights>
+    <entry>
+        <title type="html"><![CDATA[关于投资基金那些事]]></title>
+        <id>https://xwl.io/post/investment-fund/</id>
+        <link href="https://xwl.io/post/investment-fund/">
+        </link>
+        <updated>2021-06-06T16:30:27.000Z</updated>
+    </entry>
     <entry>
         <title type="html"><![CDATA[Windows下开发OpenResty]]></title>
         <id>https://xwl.io/post/openresty-windows-develop/</id>
@@ -142,12 +149,5 @@
         <link href="https://xwl.io/post/RlIk8BA71/">
         </link>
         <updated>2021-04-25T15:49:14.000Z</updated>
-    </entry>
-    <entry>
-        <title type="html"><![CDATA[Kubernetes学习路径 & 教程]]></title>
-        <id>https://xwl.io/post/WpUHlquQY/</id>
-        <link href="https://xwl.io/post/WpUHlquQY/">
-        </link>
-        <updated>2021-04-23T16:31:44.000Z</updated>
     </entry>
 </feed>
